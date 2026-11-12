@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GradeWise - AI</title>
+    <title>GradeWise</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -44,11 +44,17 @@ body {
   width: min(1480px, 100%);
 }
 
-.topbar {
+.topbar-wrap {
   position: sticky;
-  top: 20px;
-  z-index: 20;
-  background: rgba(17, 17, 22, 0.95);
+  top: 0;
+  z-index: 100;
+  background: var(--canvas);
+  padding-top: 20px;
+  margin-bottom: 25px;
+}
+
+.topbar {
+  background: #111116;
   border: 1px solid #292532;
   border-radius: 22px;
   padding: 13px 20px;
@@ -56,7 +62,6 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 18px;
-  margin-bottom: 25px;
   box-shadow: 0 4px 18px var(--shadow);
 }
 
@@ -923,14 +928,71 @@ th {
   display: none !important;
 }
 
+.section { display: none; }
+.section.active { display: block; }
+
+.assignments-layout {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 18px;
+  align-items: start;
+}
+
+.assignments-layout .card {
+  overflow-y: auto;
+  height: 100%;
+}
+
+.assignments-layout .card:first-child {
+  overflow-y: visible;
+  height: auto;
+}
+
+.assign-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.assign-form-group label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #a59bb5;
+}
+
+.assign-form-group input {
+  width: 100%;
+  border: 1px solid #3b2b50;
+  border-radius: 10px;
+  background: #0c0c11;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  padding: 10px 11px;
+}
+
+.assign-form-group input:focus {
+  outline: 2px solid #7c3aed;
+  outline-offset: 1px;
+}
+
+@media (max-width: 980px) {
+  .assignments-layout {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+}
+
     </style>
   </head>
   <body data-role="teacher">
     <div class="page-shell">
+      <div class="topbar-wrap">
       <header class="topbar" id="dashboard">
         <div class="brand">
           <div class="brand-mark">✦</div>
-          <div class="brand-name">GradeWise<span> - AI</span></div>
+          <div class="brand-name">GradeWise</div>
         </div>
 
         <nav class="nav-links" aria-label="Main navigation">
@@ -953,7 +1015,9 @@ th {
           </div>
         </div>
       </header>
+      </div>
 
+      <div id="section-overview" class="section active">
       <section class="page-head">
         <div>
           <div class="eyebrow">Workspace / Overview</div>
@@ -1166,7 +1230,117 @@ th {
       <footer class="footer-note">
         GradeWise - AI &nbsp;·&nbsp; Intelligent assessment workspace &nbsp;·&nbsp; AI suggestions require teacher review
       </footer>
-    </div>
+      </div>
+
+      <div id="section-students" class="section">
+        <section class="page-head">
+          <div>
+            <div class="eyebrow">Workspace / Students</div>
+            <h1>Students</h1>
+            <p class="page-sub">All students who have submitted assignments.</p>
+          </div>
+        </section>
+        <article class="card" style="width:100%;">
+          <div class="panel-header">
+            <div>
+              <div class="card-title">Student Submissions</div>
+              <div class="card-sub">Student name, assignment, subject and date submitted</div>
+            </div>
+          </div>
+          <div class="evaluation-filters">
+            <label class="sr-only" for="students-search">Search</label>
+            <input id="students-search" type="search" placeholder="Search students or assignments" />
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Assignment</th>
+                <th>Subject</th>
+                <th>Submitted</th>
+              </tr>
+            </thead>
+            <tbody id="students-body"></tbody>
+          </table>
+        </article>
+      </div>
+
+      <div id="section-assignments" class="section">
+        <section class="page-head">
+          <div>
+            <div class="eyebrow">Workspace / Assignments</div>
+            <h1>Assignments</h1>
+            <p class="page-sub">Create assignments and review student submissions.</p>
+          </div>
+        </section>
+        <div class="assignments-layout">
+          <article class="card">
+            <div class="card-title" style="margin-bottom:16px;">Create Assignment</div>
+            <form id="inline-assignment-form" enctype="multipart/form-data">
+              <div class="assign-form-group">
+                <label for="ia-title">Assignment title</label>
+                <input id="ia-title" name="title" maxlength="160" required />
+              </div>
+              <div class="assign-form-group">
+                <label for="ia-subject">Subject</label>
+                <input id="ia-subject" name="subject" maxlength="80" required />
+              </div>
+              <div class="assign-form-group">
+                <label for="ia-due-date">Due date</label>
+                <input id="ia-due-date" name="due_date" type="date" />
+              </div>
+              <div class="assign-form-group">
+                <label for="ia-total-marks">Total marks</label>
+                <input id="ia-total-marks" name="total_marks" type="number" min="1" max="1000" step="1" value="20" required />
+              </div>
+              <div class="assign-form-group">
+                <label for="ia-file">Assignment PDF</label>
+                <input id="ia-file" name="assignment_file" type="file" accept="application/pdf,.pdf" required />
+                <small style="color:#a59bb5;font-size:10px;">Scanned pages are processed with Google Vision OCR.</small>
+              </div>
+              <div class="assign-form-group">
+                <label for="ia-key-file">Key Answer PDF <span style="color:#a59bb5;font-weight:400;">(optional)</span></label>
+                <input id="ia-key-file" name="key_answer_file" type="file" accept="application/pdf,.pdf" />
+                <small style="color:#a59bb5;font-size:10px;">Used as the reference answer for AI grading. Not shown to students.</small>
+              </div>
+              <p class="dialog-error" id="ia-error" role="alert"></p>
+              <button class="primary-btn" id="ia-submit-btn" type="submit">Save assignment</button>
+            </form>
+          </article>
+          <article class="card">
+            <div class="panel-header">
+              <div>
+                <div class="card-title">Student Submissions</div>
+                <div class="card-sub">All submissions across assignments</div>
+              </div>
+            </div>
+            <div class="evaluation-filters">
+              <label class="sr-only" for="assign-search">Search</label>
+              <input id="assign-search" type="search" placeholder="Search students or assignments" />
+              <label class="sr-only" for="assign-status">Filter by status</label>
+              <select id="assign-status">
+                <option value="">All statuses</option>
+                <option value="pending">Pending review</option>
+                <option value="ai_evaluated">AI evaluated</option>
+                <option value="approved">Approved</option>
+              </select>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Assignment</th>
+                  <th>Student</th>
+                  <th>Score</th>
+                  <th>Status</th>
+                  <th>Submitted</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="assign-submissions-body"></tbody>
+            </table>
+          </article>
+        </div>
+      </div>
     <div class="app-feedback" id="app-feedback" role="status" aria-live="polite"></div>
     <dialog class="app-dialog" id="assignment-dialog">
       <form id="assignment-form" enctype="multipart/form-data">
@@ -1188,6 +1362,9 @@ th {
         <label for="assignment-file">Assignment PDF</label>
         <input id="assignment-file" name="assignment_file" type="file" accept="application/pdf,.pdf" required />
         <small>Students will see the PDF after it is uploaded. Scanned pages are processed with Google Vision OCR.</small>
+        <label for="assignment-key-file">Key Answer PDF <span style="color:#a59bb5;font-weight:400;">(optional)</span></label>
+        <input id="assignment-key-file" name="key_answer_file" type="file" accept="application/pdf,.pdf" />
+        <small>Used as the reference answer for AI grading. Not shown to students.</small>
         <p class="dialog-error" id="assignment-error" role="alert"></p>
         <button class="primary-btn" type="submit">Save assignment</button>
       </form>
@@ -1513,8 +1690,119 @@ th {
           link.addEventListener("click", () => {
             document.querySelectorAll(".nav-pill").forEach((item) => item.classList.remove("active"));
             link.classList.add("active");
+            const href = link.getAttribute("href");
+            document.getElementById("section-overview").classList.remove("active");
+            document.getElementById("section-assignments").classList.remove("active");
+            document.getElementById("section-students").classList.remove("active");
+            if (href === "#assignments") {
+              document.getElementById("section-assignments").classList.add("active");
+              loadAssignSubmissions();
+            } else if (href === "#students") {
+              document.getElementById("section-students").classList.add("active");
+              loadStudentsSection();
+            } else {
+              document.getElementById("section-overview").classList.add("active");
+            }
           });
         });
+
+        document.getElementById("inline-assignment-form").addEventListener("submit", async (event) => {
+          event.preventDefault();
+          const btn = document.getElementById("ia-submit-btn");
+          const errEl = document.getElementById("ia-error");
+          errEl.textContent = "";
+          btn.disabled = true;
+          btn.textContent = "Uploading...";
+          try {
+            const form = new FormData(document.getElementById("inline-assignment-form"));
+            const created = await api("/api/assignments", { method: "POST", body: form });
+            document.getElementById("inline-assignment-form").reset();
+            await Promise.all([loadAssignments(), loadDashboard(), loadAssignSubmissions()]);
+            showFeedback(
+              ["google_vision", "embedded_text_and_google_vision"].includes(created.ocr_method)
+                ? "Assignment uploaded, OCR completed, and shared with students."
+                : "Assignment uploaded and shared with students."
+            );
+          } catch (error) {
+            errEl.textContent = error.message;
+          } finally {
+            btn.disabled = false;
+            btn.textContent = "Save assignment";
+          }
+        });
+
+        let assignSearchTimer;
+        document.getElementById("assign-search").addEventListener("input", () => {
+          window.clearTimeout(assignSearchTimer);
+          assignSearchTimer = window.setTimeout(() => loadAssignSubmissions(), 200);
+        });
+        document.getElementById("assign-status").addEventListener("change", () => loadAssignSubmissions());
+
+        let studentsSearchTimer;
+        document.getElementById("students-search").addEventListener("input", () => {
+          window.clearTimeout(studentsSearchTimer);
+          studentsSearchTimer = window.setTimeout(() => loadStudentsSection(), 200);
+        });
+
+        async function loadStudentsSection() {
+          const q = document.getElementById("students-search").value.trim();
+          const params = new URLSearchParams({ limit: "200" });
+          if (q) params.set("q", q);
+          const result = await api(`/api/evaluations?${params}`);
+          const tbody = document.getElementById("students-body");
+          tbody.replaceChildren();
+          if (!result.items.length) {
+            const row = document.createElement("tr");
+            const cell = document.createElement("td"); cell.colSpan = 4; cell.textContent = "No submissions yet.";
+            row.append(cell); tbody.append(row); return;
+          }
+          for (const item of result.items) {
+            const row = document.createElement("tr");
+            [[item.student], [item.assignment_title], [item.subject || "—"], [formatSubmitted(item.submitted_at)]].forEach(([t]) => {
+              const td = document.createElement("td"); td.textContent = t; row.append(td);
+            });
+            tbody.append(row);
+          }
+        }
+
+        async function loadAssignSubmissions() {
+          const params = new URLSearchParams();
+          params.set("limit", "200");
+          const q = document.getElementById("assign-search").value.trim();
+          const st = document.getElementById("assign-status").value;
+          if (q) params.set("q", q);
+          if (st) params.set("status", st);
+          const result = await api(`/api/evaluations?${params}`);
+          const tbody = document.getElementById("assign-submissions-body");
+          tbody.replaceChildren();
+          if (!result.items.length) {
+            const row = document.createElement("tr");
+            const cell = document.createElement("td"); cell.colSpan = 6; cell.textContent = "No submissions yet.";
+            row.append(cell); tbody.append(row); return;
+          }
+          for (const item of result.items) {
+            const row = document.createElement("tr");
+            [[item.assignment_title], [item.student], [item.score === null ? "—" : `${item.score} / ${item.total_marks}`]].forEach(([t]) => {
+              const td = document.createElement("td"); td.textContent = t; row.append(td);
+            });
+            const statusTd = document.createElement("td");
+            const badge = document.createElement("span");
+            badge.className = `status ${item.status === "ai_evaluated" ? "ai" : item.status}`;
+            badge.textContent = { approved: "Approved", ai_evaluated: "AI evaluated", pending: "Pending review" }[item.status];
+            statusTd.append(badge); row.append(statusTd);
+            const timeTd = document.createElement("td"); timeTd.textContent = formatSubmitted(item.submitted_at); row.append(timeTd);
+            const actionTd = document.createElement("td");
+            if (item.status !== "approved") {
+              const btn = document.createElement("button");
+              btn.type = "button"; btn.className = "table-action";
+              btn.textContent = item.status === "pending" ? "Review" : "Approve";
+              btn.addEventListener("click", () => openReview(item));
+              actionTd.append(btn);
+            } else { actionTd.textContent = "—"; }
+            row.append(actionTd);
+            tbody.append(row);
+          }
+        }
 
         const avatarButton = document.getElementById("avatar-button");
         const profileMenu = document.getElementById("profile-menu");

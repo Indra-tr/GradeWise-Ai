@@ -39,7 +39,11 @@ CREATE TABLE IF NOT EXISTS public.evaluations (
 
 ALTER TABLE public.evaluations
     ADD COLUMN IF NOT EXISTS student_id UUID
-    REFERENCES auth.users(id) ON DELETE SET NULL;
+    REFERENCES auth.users(id) ON DELETE SET NULL,
+    ADD COLUMN IF NOT EXISTS ai_feedback TEXT;
+
+ALTER TABLE public.assignments
+    ADD COLUMN IF NOT EXISTS key_answer_text TEXT NOT NULL DEFAULT '';
 
 CREATE INDEX IF NOT EXISTS idx_evaluations_submitted_at
     ON public.evaluations(submitted_at);

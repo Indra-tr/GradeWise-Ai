@@ -334,12 +334,18 @@ def create_app(database_path=None):
                 "ocr_method": "TEXT NOT NULL DEFAULT 'none'",
                 "file_size": "INTEGER",
                 "created_by": "TEXT",
+                "key_answer_text": "TEXT NOT NULL DEFAULT ''",
             }
             for column, definition in assignment_migrations.items():
                 if column not in assignment_columns:
                     connection.execute(
                         f"ALTER TABLE assignments ADD COLUMN {column} {definition}"
                     )
+            eval_columns = {
+                row["name"] for row in connection.execute("PRAGMA table_info(evaluations)")
+            }
+            if "ai_feedback" not in eval_columns:
+                connection.execute("ALTER TABLE evaluations ADD COLUMN ai_feedback TEXT")
             assignment_count = connection.execute(
                 "SELECT COUNT(*) FROM assignments"
             ).fetchone()[0]
@@ -931,7 +937,7 @@ def create_app(database_path=None):
     def assignments():
         columns = (
             "id,title,subject,due_date,total_marks,created_at,original_filename,"
-            "storage_path,mime_type,ocr_text,ocr_method,file_size,created_by"
+            "storage_path,mime_type,ocr_text,ocr_method,file_size,created_by,key_answer_text"
         )
         if app.config["SUPABASE_ENABLED"]:
             rows = select_supabase_rows(
@@ -991,6 +997,20 @@ def create_app(database_path=None):
                 date.fromisoformat(due_date)
             except (TypeError, ValueError):
                 return jsonify(error="Due date must be a valid ISO date."), 400
+
+        key_upload = request.files.get("key_answer_file") if not request.is_json else None
+        key_answer_text = ""
+        if key_upload and key_upload.filename:
+            key_bytes = key_upload.stream.read(app.config["MAX_ASSIGNMENT_UPLOAD_BYTES"] + 1)
+            if len(key_bytes) > app.config["MAX_ASSIGNMENT_UPLOAD_BYTES"]:
+                return jsonify(error="Key answer PDF must be 20 MB or smaller."), 413
+            if not key_bytes.startswith(b"%PDF-"):
+                return jsonify(error="Key answer file must be a valid PDF."), 415
+            try:
+                key_ocr = extract_assignment_pdf(key_bytes, app.config["GOOGLE_VISION_API_KEY"])
+                key_answer_text = key_ocr["text"]
+            except GoogleVisionError as error:
+                return jsonify(error=str(error)), error.status_code
 
         pdf_bytes = None
         original_filename = None
@@ -1055,6 +1075,7 @@ def create_app(database_path=None):
                 "ocr_method": ocr["method"],
                 "file_size": len(pdf_bytes) if pdf_bytes else None,
                 "created_by": created_by,
+                "key_answer_text": key_answer_text,
             }
             if app.config["SUPABASE_ENABLED"]:
                 rows = request_supabase(
@@ -1070,14 +1091,15 @@ def create_app(database_path=None):
                     INSERT INTO assignments (
                         title, subject, due_date, total_marks, created_at,
                         original_filename, storage_path, mime_type, ocr_text,
-                        ocr_method, file_size, created_by
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        ocr_method, file_size, created_by, key_answer_text
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         record["title"], record["subject"], record["due_date"],
                         record["total_marks"], created_at, record["original_filename"],
                         record["storage_path"], record["mime_type"], record["ocr_text"],
                         record["ocr_method"], record["file_size"], record["created_by"],
+                        record["key_answer_text"],
                     ),
                 )
                 assignment_id = cursor.lastrowid
@@ -1189,13 +1211,13 @@ def create_app(database_path=None):
         if app.config["SUPABASE_ENABLED"]:
             rows = request_supabase(
                 "assignments",
-                params={"id": f"eq.{assignment_id}", "select": "id,title,ocr_text,total_marks"},
+                params={"id": f"eq.{assignment_id}", "select": "id,title,ocr_text,total_marks,key_answer_text"},
             )
             assignment = rows[0] if rows else None
         else:
             with closing(connect_database()) as connection:
                 assignment = connection.execute(
-                    "SELECT id, title, ocr_text, total_marks FROM assignments WHERE id = ?",
+                    "SELECT id, title, ocr_text, total_marks, key_answer_text FROM assignments WHERE id = ?",
                     (assignment_id,),
                 ).fetchone()
         if not assignment:
@@ -1203,7 +1225,7 @@ def create_app(database_path=None):
 
         total_marks = assignment["total_marks"]
         question = assignment["title"]
-        reference_answer = assignment["ocr_text"] or ""
+        reference_answer = assignment["key_answer_text"] or assignment["ocr_text"] or ""
 
         # Build a simple rubric from total_marks
         rubric = [
@@ -1221,6 +1243,11 @@ def create_app(database_path=None):
 
         score = result["score"]
         eval_status = "ai_evaluated"
+        ai_feedback = json.dumps({
+            "summary": result["summary"],
+            "confidence": result["confidence"],
+            "criterion_scores": result["criterion_scores"],
+        })
         submitted_at = datetime.now().replace(microsecond=0).isoformat()
         current_user = getattr(g, "current_user", {}) or {}
         student_id = current_user.get("id") or current_user.get("email", "unknown")
@@ -1251,6 +1278,7 @@ def create_app(database_path=None):
                     "score": score,
                     "status": eval_status,
                     "submitted_at": submitted_at,
+                    "ai_feedback": ai_feedback,
                 },
             )
         else:
@@ -1260,8 +1288,8 @@ def create_app(database_path=None):
                     (assignment_id, student_id, student_name, answer_text, submitted_at),
                 )
                 connection.execute(
-                    "INSERT INTO evaluations (assignment_id, student, score, status, submitted_at) VALUES (?, ?, ?, ?, ?)",
-                    (assignment_id, student_name, score, eval_status, submitted_at),
+                    "INSERT INTO evaluations (assignment_id, student, score, status, submitted_at, ai_feedback) VALUES (?, ?, ?, ?, ?, ?)",
+                    (assignment_id, student_name, score, eval_status, submitted_at, ai_feedback),
                 )
                 connection.commit()
 
@@ -1290,7 +1318,7 @@ def create_app(database_path=None):
         if app.config["SUPABASE_ENABLED"]:
             params = apply_student_scope({
                 "select": (
-                    "id,student,score,status,submitted_at,"
+                    "id,student,score,status,submitted_at,ai_feedback,"
                     "assignments!evaluations_assignment_id_fkey(title,subject,total_marks)"
                 ),
                 "order": "submitted_at.desc,id.desc",
@@ -1311,6 +1339,7 @@ def create_app(database_path=None):
                     "score": row.get("score"),
                     "status": row["status"],
                     "submitted_at": row["submitted_at"],
+                    "ai_feedback": row.get("ai_feedback"),
                 }
                 if normalized_query and not any(
                     normalized_query in str(item[field] or "").casefold()
@@ -1353,7 +1382,7 @@ def create_app(database_path=None):
             rows = connection.execute(
                 f"""
                 SELECT e.id, a.title AS assignment_title, a.subject, a.total_marks,
-                       e.student, e.score, e.status, e.submitted_at
+                       e.student, e.score, e.status, e.submitted_at, e.ai_feedback
                 FROM evaluations AS e
                 JOIN assignments AS a ON a.id = e.assignment_id
                 {where_clause}

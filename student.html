@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GradeWise - AI</title>
+    <title>GradeWise</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -44,11 +44,17 @@ body {
   width: min(1480px, 100%);
 }
 
-.topbar {
+.topbar-wrap {
   position: sticky;
-  top: 20px;
-  z-index: 20;
-  background: rgba(17, 17, 22, 0.95);
+  top: 0;
+  z-index: 100;
+  background: var(--canvas);
+  padding-top: 20px;
+  margin-bottom: 25px;
+}
+
+.topbar {
+  background: #111116;
   border: 1px solid #292532;
   border-radius: 22px;
   padding: 13px 20px;
@@ -56,7 +62,6 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 18px;
-  margin-bottom: 25px;
   box-shadow: 0 4px 18px var(--shadow);
 }
 
@@ -923,21 +928,43 @@ th {
   display: none !important;
 }
 
+.section { display: none; }
+.section.active { display: block; }
+
+.assignments-layout {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 18px;
+  height: calc(100vh - 140px);
+}
+
+.assignments-layout .card {
+  overflow-y: auto;
+  height: 100%;
+}
+
+@media (max-width: 980px) {
+  .assignments-layout {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+}
+
     </style>
   </head>
   <body data-role="student">
     <div class="page-shell">
+      <div class="topbar-wrap">
       <header class="topbar" id="dashboard">
         <div class="brand">
           <div class="brand-mark">✦</div>
-          <div class="brand-name">GradeWise<span> - AI</span></div>
+          <div class="brand-name">GradeWise</div>
         </div>
 
         <nav class="nav-links" aria-label="Main navigation">
           <a class="nav-pill active" href="#dashboard">Dashboard</a>
           <a class="nav-pill" href="#assignments">Assignments</a>
           <a class="nav-pill" href="#evaluations">AI Evaluation</a>
-          <a class="nav-pill" href="#students">Students</a>
           <a class="nav-pill" href="#reports">Reports &amp; Progress</a>
         </nav>
 
@@ -953,7 +980,9 @@ th {
           </div>
         </div>
       </header>
+      </div>
 
+      <div id="section-overview" class="section active">
       <section class="page-head">
         <div>
           <div class="eyebrow">Workspace / Overview</div>
@@ -1166,7 +1195,54 @@ th {
       <footer class="footer-note">
         GradeWise - AI &nbsp;·&nbsp; Intelligent assessment workspace &nbsp;·&nbsp; AI suggestions require teacher review
       </footer>
-    </div>
+      </div>
+
+      <div id="section-assignments" class="section">
+        <section class="page-head">
+          <div>
+            <div class="eyebrow">Workspace / Assignments</div>
+            <h1>Assignments</h1>
+            <p class="page-sub">View assignments from your teacher and submit your answers.</p>
+          </div>
+        </section>
+        <div class="assignments-layout">
+          <article class="card">
+            <div class="card-title" style="margin-bottom:16px;">My Assignments</div>
+            <ul class="assignment-list" id="assign-section-list" aria-label="Assignments"></ul>
+          </article>
+          <article class="card">
+            <div class="panel-header">
+              <div>
+                <div class="card-title">My Submissions</div>
+                <div class="card-sub">Your submitted evaluations and results</div>
+              </div>
+            </div>
+            <div class="evaluation-filters">
+              <label class="sr-only" for="stu-assign-search">Search</label>
+              <input id="stu-assign-search" type="search" placeholder="Search assignments" />
+              <label class="sr-only" for="stu-assign-status">Filter by status</label>
+              <select id="stu-assign-status">
+                <option value="">All statuses</option>
+                <option value="pending">Pending review</option>
+                <option value="ai_evaluated">AI evaluated</option>
+                <option value="approved">Approved</option>
+              </select>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Assignment</th>
+                  <th>Score</th>
+                  <th>Status</th>
+                  <th>Submitted</th>
+                  <th>Feedback</th>
+                </tr>
+              </thead>
+              <tbody id="stu-submissions-body"></tbody>
+            </table>
+          </article>
+        </div>
+      </div>
     <div class="app-feedback" id="app-feedback" role="status" aria-live="polite"></div>
     <dialog class="app-dialog" id="submit-dialog" style="width:min(520px,calc(100% - 32px));">
       <form id="submit-form">
@@ -1182,7 +1258,7 @@ th {
         <small style="color:#a59bb5;font-size:11px;">Your PDF will be scanned with OCR and evaluated by AI. Score is shown instantly.</small>
         <p class="dialog-error" id="submit-error" role="alert"></p>
         <div id="submit-result" hidden></div>
-        <button class="primary-btn" type="submit">Submit</button>
+        <button class="primary-btn" id="submit-btn" type="submit">Submit</button>
       </form>
     </dialog>
     <dialog class="app-dialog" id="assignment-dialog">
@@ -1382,7 +1458,7 @@ th {
           if (!items.length) {
             const row = document.createElement("tr");
             const cell = makeCell("No evaluations match these filters.");
-            cell.colSpan = studentView ? 5 : 6;
+            cell.colSpan = studentView ? 6 : 6;
             row.append(cell);
             evaluationBody.append(row);
           }
@@ -1418,6 +1494,44 @@ th {
                 actionCell.append(actionButton);
               } else {
                 actionCell.textContent = "—";
+              }
+              row.append(actionCell);
+            } else {
+              // student: show feedback button if ai_feedback is stored on this evaluation
+              const actionCell = document.createElement("td");
+              if (item.ai_feedback) {
+                let fb;
+                try { fb = JSON.parse(item.ai_feedback); } catch { fb = null; }
+                if (fb) {
+                  const fbBtn = document.createElement("button");
+                  fbBtn.type = "button";
+                  fbBtn.className = "table-action";
+                  fbBtn.textContent = "View Feedback";
+                  fbBtn.addEventListener("click", () => {
+                    const existingDetail = row.nextElementSibling;
+                    if (existingDetail && existingDetail.dataset.feedbackRow) {
+                      existingDetail.remove();
+                      return;
+                    }
+                    const detailRow = document.createElement("tr");
+                    detailRow.dataset.feedbackRow = "1";
+                    const detailCell = document.createElement("td");
+                    detailCell.colSpan = 6;
+                    detailCell.style.cssText = "padding:0 10px 12px;";
+                    detailCell.innerHTML = `
+                      <div style="background:#171124;border:1px solid #3b2b50;border-radius:12px;padding:12px;">
+                        <div style="font-size:11px;color:#bcb4c9;margin-bottom:6px;">Confidence: ${Math.round(fb.confidence * 100)}%</div>
+                        <div style="font-size:12px;color:#e2dced;margin-bottom:6px;">${fb.summary}</div>
+                        ${fb.criterion_scores.map(c => `
+                          <div style="border-top:1px solid #3b2b50;padding-top:5px;margin-top:5px;font-size:11px;">
+                            <b>${c.criterion}</b>: ${c.score}/${c.points} &nbsp;<span style="color:#a59bb5;">${c.feedback}</span>
+                          </div>`).join("")}
+                      </div>`;
+                    detailRow.append(detailCell);
+                    row.after(detailRow);
+                  });
+                  actionCell.append(fbBtn);
+                }
               }
               row.append(actionCell);
             }
@@ -1474,6 +1588,11 @@ th {
           document.getElementById("submit-error").textContent = "";
           document.getElementById("submit-result").hidden = true;
           document.getElementById("submit-result").innerHTML = "";
+          const submitBtn = document.getElementById("submit-btn");
+          submitBtn.type = "submit";
+          submitBtn.textContent = "Submit";
+          submitBtn.disabled = false;
+          submitBtn.onclick = null;
           submitForm.reset();
           submitDialog.showModal();
         }
@@ -1486,14 +1605,12 @@ th {
           const form = new FormData();
           form.append("assignment_id", selectedAssignment.id);
           form.append("answer_pdf", fileInput.files[0]);
-          const submitBtn = submitForm.querySelector("button[type=submit]");
+          const submitBtn = document.getElementById("submit-btn");
           submitBtn.textContent = "Evaluating...";
           submitBtn.disabled = true;
           document.getElementById("submit-error").textContent = "";
           try {
             const result = await api("/api/submissions", { method: "POST", body: form });
-            submitBtn.textContent = "Submit";
-            submitBtn.disabled = false;
             const resultEl = document.getElementById("submit-result");
             resultEl.hidden = false;
             resultEl.innerHTML = `
@@ -1507,6 +1624,10 @@ th {
                     <span style="color:#a59bb5;">${c.feedback}</span>
                   </div>`).join("")}
               </div>`;
+            submitBtn.textContent = "Okay";
+            submitBtn.disabled = false;
+            submitBtn.type = "button";
+            submitBtn.onclick = () => { submitDialog.close(); };
             await refreshDashboard();
           } catch (error) {
             submitBtn.textContent = "Submit";
@@ -1593,8 +1714,106 @@ th {
           link.addEventListener("click", () => {
             document.querySelectorAll(".nav-pill").forEach((item) => item.classList.remove("active"));
             link.classList.add("active");
+            const href = link.getAttribute("href");
+            if (href === "#assignments") {
+              document.getElementById("section-overview").classList.remove("active");
+              document.getElementById("section-assignments").classList.add("active");
+              loadStuAssignSection();
+            } else {
+              document.getElementById("section-assignments").classList.remove("active");
+              document.getElementById("section-overview").classList.add("active");
+            }
           });
         });
+
+        let stuAssignSearchTimer;
+        document.getElementById("stu-assign-search").addEventListener("input", () => {
+          window.clearTimeout(stuAssignSearchTimer);
+          stuAssignSearchTimer = window.setTimeout(() => loadStuSubmissions(), 200);
+        });
+        document.getElementById("stu-assign-status").addEventListener("change", () => loadStuSubmissions());
+
+        async function loadStuAssignSection() {
+          await Promise.all([loadStuAssignList(), loadStuSubmissions()]);
+        }
+
+        async function loadStuAssignList() {
+          const assignments = await api("/api/assignments");
+          const list = document.getElementById("assign-section-list");
+          list.replaceChildren();
+          for (const assignment of assignments) {
+            const item = document.createElement("li");
+            const title = document.createElement("strong"); title.textContent = assignment.title;
+            const details = document.createElement("span");
+            const dueDate = assignment.due_date ? ` · Due ${new Date(`${assignment.due_date}T00:00:00`).toLocaleDateString()}` : "";
+            details.textContent = `${assignment.subject} · ${assignment.total_marks} marks${dueDate}`;
+            item.append(title, details);
+            if (assignment.has_file && assignment.file_url) {
+              const fileLink = document.createElement("a");
+              fileLink.href = assignment.file_url; fileLink.target = "_blank"; fileLink.rel = "noopener noreferrer";
+              fileLink.textContent = `Open ${assignment.original_filename || "assignment PDF"}`;
+              item.append(fileLink);
+            }
+            const submitBtn = document.createElement("button");
+            submitBtn.type = "button"; submitBtn.className = "table-action"; submitBtn.textContent = "Submit Answer";
+            submitBtn.addEventListener("click", () => openSubmitDialog(assignment));
+            item.append(submitBtn);
+            list.append(item);
+          }
+        }
+
+        async function loadStuSubmissions() {
+          const params = new URLSearchParams();
+          params.set("limit", "200");
+          const q = document.getElementById("stu-assign-search").value.trim();
+          const st = document.getElementById("stu-assign-status").value;
+          if (q) params.set("q", q);
+          if (st) params.set("status", st);
+          const result = await api(`/api/evaluations?${params}`);
+          const tbody = document.getElementById("stu-submissions-body");
+          tbody.replaceChildren();
+          if (!result.items.length) {
+            const row = document.createElement("tr");
+            const cell = document.createElement("td"); cell.colSpan = 5; cell.textContent = "No submissions yet.";
+            row.append(cell); tbody.append(row); return;
+          }
+          for (const item of result.items) {
+            const row = document.createElement("tr");
+            [[item.assignment_title], [item.score === null ? "—" : `${item.score} / ${item.total_marks}`]].forEach(([t]) => {
+              const td = document.createElement("td"); td.textContent = t; row.append(td);
+            });
+            const statusTd = document.createElement("td");
+            const badge = document.createElement("span");
+            badge.className = `status ${item.status === "ai_evaluated" ? "ai" : item.status}`;
+            badge.textContent = { approved: "Approved", ai_evaluated: "AI evaluated", pending: "Pending review" }[item.status];
+            statusTd.append(badge); row.append(statusTd);
+            const timeTd = document.createElement("td"); timeTd.textContent = formatSubmitted(item.submitted_at); row.append(timeTd);
+            const fbTd = document.createElement("td");
+            if (item.ai_feedback) {
+              let fb; try { fb = JSON.parse(item.ai_feedback); } catch { fb = null; }
+              if (fb) {
+                const fbBtn = document.createElement("button");
+                fbBtn.type = "button"; fbBtn.className = "table-action"; fbBtn.textContent = "View Feedback";
+                fbBtn.addEventListener("click", () => {
+                  const next = row.nextElementSibling;
+                  if (next && next.dataset.feedbackRow) { next.remove(); return; }
+                  const detailRow = document.createElement("tr"); detailRow.dataset.feedbackRow = "1";
+                  const detailCell = document.createElement("td"); detailCell.colSpan = 5;
+                  detailCell.style.cssText = "padding:0 10px 12px;";
+                  detailCell.innerHTML = `<div style="background:#171124;border:1px solid #3b2b50;border-radius:12px;padding:12px;">
+                    <div style="font-size:11px;color:#bcb4c9;margin-bottom:6px;">Confidence: ${Math.round(fb.confidence * 100)}%</div>
+                    <div style="font-size:12px;color:#e2dced;margin-bottom:6px;">${fb.summary}</div>
+                    ${fb.criterion_scores.map(c => `<div style="border-top:1px solid #3b2b50;padding-top:5px;margin-top:5px;font-size:11px;"><b>${c.criterion}</b>: ${c.score}/${c.points} &nbsp;<span style="color:#a59bb5;">${c.feedback}</span></div>`).join("")}
+                  </div>`;
+                  detailRow.append(detailCell); row.after(detailRow);
+                });
+                fbTd.append(fbBtn);
+              }
+            } else { fbTd.textContent = "—"; }
+            row.append(fbTd);
+            tbody.append(row);
+          }
+        }
 
         const avatarButton = document.getElementById("avatar-button");
         const profileMenu = document.getElementById("profile-menu");
@@ -1631,7 +1850,7 @@ th {
           }
           if (studentView) {
             document.getElementById("create-assignment-button").hidden = false;
-            document.getElementById("evaluation-action-heading").hidden = true;
+            document.getElementById("evaluation-action-heading").hidden = false;
             document.querySelector(".quick-action .card-title").textContent = "My assignments";
             document.querySelector(".quick-action .card-sub").textContent =
               "Assignments shared by your teacher";
