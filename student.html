@@ -944,8 +944,13 @@ th {
         <div class="nav-right">
           <span class="nav-icon">⚙</span>
           <span class="nav-icon">♧</span>
-          <button class="nav-icon" id="logout-button" type="button" aria-label="Log out" title="Log out">↪</button>
-          <span class="avatar">S</span>
+          <div style="position:relative;">
+            <button class="avatar" id="avatar-button" type="button" aria-label="Profile menu" aria-expanded="false">S</button>
+            <div id="profile-menu" hidden style="position:absolute;top:calc(100% + 8px);right:0;min-width:160px;background:#1a1025;border:1px solid #3b2b50;border-radius:14px;padding:10px;box-shadow:0 8px 24px rgba(109,40,217,0.35);z-index:30;">
+              <div id="profile-name" style="font-size:11px;color:#a59bb5;padding:4px 6px 8px;border-bottom:1px solid #292532;margin-bottom:6px;">Student</div>
+              <button id="logout-button" type="button" style="width:100%;text-align:left;background:transparent;border:none;color:#f87171;font:inherit;font-size:12px;padding:6px 8px;border-radius:8px;cursor:pointer;">↪ &nbsp;Log out</button>
+            </div>
+          </div>
         </div>
       </header>
 
@@ -956,20 +961,13 @@ th {
           <p class="page-sub">A clear view of your evaluations, assignments and learning progress.</p>
         </div>
 
-        <div class="view-select" aria-label="View selector">
-          <label for="view">View</label>
-          <select id="view">
-            <option value="index.html">Main</option>
-            <option value="teacher.html">Teacher</option>
-            <option value="student.html" selected>Student</option>
-          </select>
-        </div>
+
       </section>
 
       <section class="metrics-grid">
         <article class="hero-card card tall">
           <div class="hero-kicker">Your evaluation workspace</div>
-          <h2>Hello, Student</h2>
+          <h2>Hello, Student 👋</h2>
           <p>Turn written answers into meaningful feedback.</p>
           <div class="hero-bottom">
             <div class="hero-stat">
@@ -1159,7 +1157,7 @@ th {
           <div class="card quick-action" id="assignments">
             <div class="card-title">Quick action</div>
             <div class="card-sub">Start your next evaluation workflow</div>
-            <button class="primary-btn" id="create-assignment-button" type="button">＋ Create assignment</button>
+            <button class="primary-btn" id="create-assignment-button" type="button">＋ Submit Assignment</button>
             <ul class="assignment-list" id="assignment-list" aria-label="Assignments"></ul>
           </div>
         </aside>
@@ -1518,6 +1516,12 @@ th {
         });
 
         document.getElementById("create-assignment-button").addEventListener("click", () => {
+          if (studentView) {
+            if (!selectedAssignment) {
+              showFeedback("Click 'Submit Answer' on an assignment below to submit.", false);
+            }
+            return;
+          }
           document.getElementById("assignment-error").textContent = "";
           assignmentForm.reset();
           assignmentDialog.showModal();
@@ -1592,8 +1596,17 @@ th {
           });
         });
 
-        document.getElementById("view").addEventListener("change", (event) => {
-          window.location.href = event.currentTarget.value;
+        const avatarButton = document.getElementById("avatar-button");
+        const profileMenu = document.getElementById("profile-menu");
+        avatarButton.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const open = !profileMenu.hidden;
+          profileMenu.hidden = open;
+          avatarButton.setAttribute("aria-expanded", String(!open));
+        });
+        document.addEventListener("click", () => {
+          profileMenu.hidden = true;
+          avatarButton.setAttribute("aria-expanded", "false");
         });
 
         document.getElementById("logout-button").addEventListener("click", async () => {
@@ -1613,9 +1626,11 @@ th {
           }
           if (account.full_name) {
             document.querySelector(".hero-card h2").textContent = `Hello, ${account.full_name}`;
+            document.getElementById("profile-name").textContent = account.full_name;
+            document.getElementById("avatar-button").textContent = account.full_name.charAt(0).toUpperCase();
           }
           if (studentView) {
-            document.getElementById("create-assignment-button").hidden = true;
+            document.getElementById("create-assignment-button").hidden = false;
             document.getElementById("evaluation-action-heading").hidden = true;
             document.querySelector(".quick-action .card-title").textContent = "My assignments";
             document.querySelector(".quick-action .card-sub").textContent =
