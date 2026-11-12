@@ -32,10 +32,16 @@ CREATE TABLE IF NOT EXISTS public.evaluations (
     student TEXT NOT NULL,
     score NUMERIC CHECK (score IS NULL OR score >= 0),
     status TEXT NOT NULL CHECK (
-        status IN ('approved', 'ai_evaluated', 'pending')
+        status IN ('approved', 'ai_evaluated', 'pending', 'rejected')
     ),
     submitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+ALTER TABLE public.evaluations
+    DROP CONSTRAINT IF EXISTS evaluations_status_check;
+ALTER TABLE public.evaluations
+    ADD CONSTRAINT evaluations_status_check
+    CHECK (status IN ('approved', 'ai_evaluated', 'pending', 'rejected'));
 
 ALTER TABLE public.evaluations
     ADD COLUMN IF NOT EXISTS student_id UUID

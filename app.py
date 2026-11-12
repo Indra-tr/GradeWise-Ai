@@ -31,7 +31,7 @@ BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env")
 
 DEFAULT_DATABASE = BASE_DIR / "data" / "gradewise.sqlite3"
-STATUSES = {"approved", "ai_evaluated", "pending"}
+STATUSES = {"approved", "ai_evaluated", "pending", "rejected"}
 CHART_SUBJECTS = ["DBMS", "OS", "Maths", "Python", "AI/ML", "Java"]
 SUPABASE_PAGE_SIZE = 1000
 
@@ -300,7 +300,7 @@ def create_app(database_path=None):
                     student TEXT NOT NULL,
                     score REAL,
                     status TEXT NOT NULL CHECK (
-                        status IN ('approved', 'ai_evaluated', 'pending')
+                        status IN ('approved', 'ai_evaluated', 'pending', 'rejected')
                     ),
                     submitted_at TEXT NOT NULL,
                     CHECK (score IS NULL OR score >= 0)
@@ -346,6 +346,44 @@ def create_app(database_path=None):
             }
             if "ai_feedback" not in eval_columns:
                 connection.execute("ALTER TABLE evaluations ADD COLUMN ai_feedback TEXT")
+            evaluation_schema = connection.execute(
+                "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'evaluations'"
+            ).fetchone()["sql"]
+            if "'rejected'" not in evaluation_schema.lower():
+                connection.execute(
+                    """
+                    CREATE TABLE evaluations_replacement (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        assignment_id INTEGER NOT NULL REFERENCES assignments(id),
+                        student TEXT NOT NULL,
+                        score REAL,
+                        status TEXT NOT NULL CHECK (
+                            status IN ('approved', 'ai_evaluated', 'pending', 'rejected')
+                        ),
+                        submitted_at TEXT NOT NULL,
+                        ai_feedback TEXT,
+                        CHECK (score IS NULL OR score >= 0)
+                    )
+                    """
+                )
+                connection.execute(
+                    """
+                    INSERT INTO evaluations_replacement
+                        (id, assignment_id, student, score, status, submitted_at, ai_feedback)
+                    SELECT id, assignment_id, student, score, status, submitted_at, ai_feedback
+                    FROM evaluations
+                    """
+                )
+                connection.execute("DROP TABLE evaluations")
+                connection.execute(
+                    "ALTER TABLE evaluations_replacement RENAME TO evaluations"
+                )
+                connection.execute(
+                    "CREATE INDEX idx_evaluations_submitted_at ON evaluations(submitted_at)"
+                )
+                connection.execute(
+                    "CREATE INDEX idx_evaluations_status ON evaluations(status)"
+                )
             assignment_count = connection.execute(
                 "SELECT COUNT(*) FROM assignments"
             ).fetchone()[0]
@@ -884,6 +922,7 @@ def create_app(database_path=None):
                     "pending": pending,
                     "approved": approved,
                     "ai_evaluated": ai_evaluated,
+                    "rejected": counts["rejected"],
                     "assignment_count": len(assignments),
                     "class_average": round(average),
                     "evaluated_percent": (
@@ -899,7 +938,8 @@ def create_app(database_path=None):
                     COUNT(*) AS submissions,
                     SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) AS approved,
                     SUM(CASE WHEN status = 'ai_evaluated' THEN 1 ELSE 0 END) AS ai_evaluated,
-                    SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS pending
+                    SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS pending,
+                    SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) AS rejected
                 FROM evaluations
                 """
             ).fetchone()
@@ -919,6 +959,7 @@ def create_app(database_path=None):
         approved = counts["approved"] or 0
         ai_evaluated = counts["ai_evaluated"] or 0
         pending = counts["pending"] or 0
+        rejected = counts["rejected"] or 0
         evaluated = approved + ai_evaluated
         return jsonify(
             {
@@ -927,6 +968,7 @@ def create_app(database_path=None):
                 "pending": pending,
                 "approved": approved,
                 "ai_evaluated": ai_evaluated,
+                "rejected": rejected,
                 "assignment_count": assignment_count,
                 "class_average": round(average or 0),
                 "evaluated_percent": round(evaluated * 100 / submissions) if submissions else 0,
@@ -1404,8 +1446,9 @@ def create_app(database_path=None):
     @app.patch("/api/evaluations/<int:evaluation_id>")
     def approve_evaluation(evaluation_id):
         payload = request.get_json(silent=True)
-        if not isinstance(payload, dict) or payload.get("status") != "approved":
-            return jsonify(error="Set the evaluation status to approved."), 400
+        if not isinstance(payload, dict) or payload.get("status") not in {"approved", "rejected"}:
+            return jsonify(error="Set the evaluation status to approved or rejected."), 400
+        status = payload["status"]
 
         score = payload.get("score")
         if app.config["SUPABASE_ENABLED"]:
@@ -1423,8 +1466,20 @@ def create_app(database_path=None):
             if not rows:
                 return jsonify(error="Evaluation not found."), 404
             row = rows[0]
-            if row["status"] == "approved":
+            if status == "approved" and row["status"] == "approved":
                 return jsonify(error="This evaluation is already approved."), 409
+            if status == "rejected":
+                updated = request_supabase(
+                    "evaluations",
+                    method="PATCH",
+                    params={"id": f"eq.{evaluation_id}"},
+                    payload={"status": "rejected"},
+                )
+                if not updated:
+                    return jsonify(error="Evaluation not found."), 404
+                return jsonify(
+                    {"id": evaluation_id, "status": "rejected", "score": row.get("score")}
+                )
             if score is None:
                 score = row.get("score")
             total_marks = relation_record(row).get("total_marks")
@@ -1437,14 +1492,14 @@ def create_app(database_path=None):
                 "evaluations",
                 method="PATCH",
                 params={"id": f"eq.{evaluation_id}"},
-                payload={"score": score, "status": "approved"},
+                payload={"score": score, "status": status},
             )
             if not updated:
                 return jsonify(error="Evaluation not found."), 404
             return jsonify(
                 {
                     "id": evaluation_id,
-                    "status": "approved",
+                    "status": status,
                     "score": score,
                 }
             )
@@ -1461,8 +1516,17 @@ def create_app(database_path=None):
             ).fetchone()
             if row is None:
                 return jsonify(error="Evaluation not found."), 404
-            if row["status"] == "approved":
+            if status == "approved" and row["status"] == "approved":
                 return jsonify(error="This evaluation is already approved."), 409
+            if status == "rejected":
+                connection.execute(
+                    "UPDATE evaluations SET status = 'rejected' WHERE id = ?",
+                    (evaluation_id,),
+                )
+                connection.commit()
+                return jsonify(
+                    {"id": evaluation_id, "status": "rejected", "score": row["score"]}
+                )
             if score is None:
                 score = row["score"]
             if isinstance(score, bool) or not isinstance(score, (int, float)):
@@ -1471,12 +1535,12 @@ def create_app(database_path=None):
                 return jsonify(error=f"Score must be between 0 and {row['total_marks']}."), 400
 
             connection.execute(
-                "UPDATE evaluations SET score = ?, status = 'approved' WHERE id = ?",
-                (score, evaluation_id),
+                "UPDATE evaluations SET score = ?, status = ? WHERE id = ?",
+                (score, status, evaluation_id),
             )
             connection.commit()
 
-        return jsonify({"id": evaluation_id, "status": "approved", "score": score})
+        return jsonify({"id": evaluation_id, "status": status, "score": score})
 
     @app.get("/api/performance")
     def performance():

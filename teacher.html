@@ -521,6 +521,7 @@ h1 {
 .dot.green { background: #7c3aed; }
 .dot.orange { background: #c084fc; }
 .dot.gray { background: #292532; }
+.dot.red { background: #e57373; }
 
 .bottom-grid {
   display: grid;
@@ -589,6 +590,12 @@ th {
   background: #120d19;
   color: #c084fc;
   border: 1px solid #5b21b6;
+}
+
+.status.rejected {
+  background: #1b1014;
+  color: #f87171;
+  border: 1px solid #7f1d1d;
 }
 
 .status.ai {
@@ -931,6 +938,39 @@ th {
 .section { display: none; }
 .section.active { display: block; }
 
+.reports-charts {
+  display: grid;
+  grid-template-columns: 1.62fr 1fr;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.reports-filters {
+  display: flex;
+  gap: 10px;
+  margin: 0 0 12px;
+  flex-wrap: wrap;
+}
+
+.reports-filters input,
+.reports-filters select {
+  min-width: 0;
+  border: 1px solid #292532;
+  border-radius: 12px;
+  background: #0c0c11;
+  color: var(--ink);
+  font: inherit;
+  font-size: 11px;
+  padding: 9px 11px;
+}
+
+.reports-filters input { flex: 1; min-width: 140px; }
+.reports-filters select { min-width: 130px; }
+
+@media (max-width: 980px) {
+  .reports-charts { grid-template-columns: 1fr; }
+}
+
 .assignments-layout {
   display: grid;
   grid-template-columns: 1fr 1.4fr;
@@ -1156,6 +1196,7 @@ th {
               <div><span class="dot green"></span> Approved <b id="approved-count">0</b></div>
               <div><span class="dot orange"></span> AI evaluated <b id="ai-evaluated-count">0</b></div>
               <div><span class="dot gray"></span> Pending <b id="donut-pending-count">0</b></div>
+              <div><span class="dot red"></span> Rejected <b id="rejected-count">0</b></div>
             </div>
           </div>
         </article>
@@ -1180,6 +1221,7 @@ th {
               <option value="pending">Pending review</option>
               <option value="ai_evaluated">AI evaluated</option>
               <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
             </select>
           </div>
 
@@ -1232,6 +1274,103 @@ th {
       </footer>
       </div>
 
+      <div id="section-reports" class="section">
+        <section class="page-head">
+          <div>
+            <div class="eyebrow">Workspace / Reports &amp; Progress</div>
+            <h1>Reports &amp; Progress</h1>
+            <p class="page-sub">Class performance overview and grade management.</p>
+          </div>
+        </section>
+        <div class="reports-charts">
+          <article class="card chart-panel">
+            <div class="panel-header">
+              <div>
+                <div class="card-title">Class performance overview</div>
+                <div class="card-sub">Average marks by subject</div>
+              </div>
+              <div class="mini-dropdown">
+                <span>Period</span>
+                <select id="rp-period" aria-label="Reporting period">
+                  <option value="month">This month</option>
+                  <option value="3months">Last 3 months</option>
+                  <option value="semester">This semester</option>
+                </select>
+              </div>
+            </div>
+            <div class="chart-wrap">
+              <div class="chart-legend">
+                <span><i class="legend-swatch prev"></i> Previous</span>
+                <span><i class="legend-swatch current"></i> Current</span>
+              </div>
+              <div class="bar-chart" id="rp-bar-chart">
+                <div class="bar-group" data-subject="DBMS"><div class="bars"><span class="bar prev" data-series="previous" style="height:61%"> </span><span class="bar current" data-series="current" style="height:72%"> </span></div><label>DBMS</label></div>
+                <div class="bar-group" data-subject="OS"><div class="bars"><span class="bar prev" data-series="previous" style="height:65%"> </span><span class="bar current" data-series="current" style="height:78%"> </span></div><label>OS</label></div>
+                <div class="bar-group" data-subject="Maths"><div class="bars"><span class="bar prev" data-series="previous" style="height:59%"> </span><span class="bar current" data-series="current" style="height:68%"> </span></div><label>Maths</label></div>
+                <div class="bar-group" data-subject="Python"><div class="bars"><span class="bar prev" data-series="previous" style="height:73%"> </span><span class="bar current" data-series="current" style="height:88%"> </span></div><label>Python</label></div>
+                <div class="bar-group" data-subject="AI/ML"><div class="bars"><span class="bar prev" data-series="previous" style="height:70%"> </span><span class="bar current" data-series="current" style="height:84%"> </span></div><label>AI/ML</label></div>
+                <div class="bar-group" data-subject="Java"><div class="bars"><span class="bar prev" data-series="previous" style="height:64%"> </span><span class="bar current" data-series="current" style="height:76%"> </span></div><label>Java</label></div>
+              </div>
+            </div>
+          </article>
+          <article class="card donut-panel">
+            <div class="card-title">Evaluation summary</div>
+            <div class="card-sub">Submission status at a glance</div>
+            <div class="donut-wrap">
+              <div class="donut-chart" id="rp-donut">
+                <div class="donut-center">
+                  <strong id="rp-donut-total">0</strong>
+                  <span>Total</span>
+                </div>
+              </div>
+              <div class="donut-legend">
+                <div><span class="dot green"></span> Approved <b id="rp-approved">0</b></div>
+                <div><span class="dot orange"></span> AI evaluated <b id="rp-ai">0</b></div>
+                <div><span class="dot gray"></span> Pending <b id="rp-pending">0</b></div>
+                <div><span class="dot red"></span> Rejected <b id="rp-rejected">0</b></div>
+              </div>
+            </div>
+          </article>
+        </div>
+        <article class="card" style="width:100%;">
+          <div class="panel-header">
+            <div>
+              <div class="card-title">All Results</div>
+              <div class="card-sub">Manage grades — approve, reject or change marks</div>
+            </div>
+          </div>
+          <div class="reports-filters">
+            <label class="sr-only" for="rp-search">Search</label>
+            <input id="rp-search" type="search" placeholder="Search students or assignments" />
+            <label class="sr-only" for="rp-subject">Subject</label>
+            <select id="rp-subject"><option value="">All subjects</option></select>
+            <label class="sr-only" for="rp-assignment">Assignment</label>
+            <select id="rp-assignment"><option value="">All assignments</option></select>
+            <label class="sr-only" for="rp-status">Status</label>
+            <select id="rp-status">
+              <option value="">All statuses</option>
+              <option value="pending">Pending review</option>
+              <option value="ai_evaluated">AI evaluated</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Assignment</th>
+                <th>Subject</th>
+                <th>Marks</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="rp-body"></tbody>
+          </table>
+        </article>
+      </div>
+
       <div id="section-students" class="section">
         <section class="page-head">
           <div>
@@ -1270,7 +1409,7 @@ th {
           <div>
             <div class="eyebrow">Workspace / Assignments</div>
             <h1>Assignments</h1>
-            <p class="page-sub">Create assignments and review student submissions.</p>
+            <p class="page-sub">Create assignments and view submission marks and statuses. Manage grades in Reports &amp; Progress.</p>
           </div>
         </section>
         <div class="assignments-layout">
@@ -1323,6 +1462,7 @@ th {
                 <option value="pending">Pending review</option>
                 <option value="ai_evaluated">AI evaluated</option>
                 <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
               </select>
             </div>
             <table>
@@ -1333,7 +1473,6 @@ th {
                   <th>Score</th>
                   <th>Status</th>
                   <th>Submitted</th>
-                  <th>Action</th>
                 </tr>
               </thead>
               <tbody id="assign-submissions-body"></tbody>
@@ -1473,14 +1612,18 @@ th {
           setText("approved-count", dashboard.approved);
           setText("ai-evaluated-count", dashboard.ai_evaluated);
           setText("donut-pending-count", dashboard.pending);
+          setText("rejected-count", dashboard.rejected);
           const approvedPercent = dashboard.submissions
             ? dashboard.approved * 100 / dashboard.submissions
             : 0;
           const aiPercent = dashboard.submissions
             ? dashboard.ai_evaluated * 100 / dashboard.submissions
             : 0;
+          const rejectedPercent = dashboard.submissions
+            ? dashboard.rejected * 100 / dashboard.submissions
+            : 0;
           document.querySelector(".donut-chart").style.background =
-            `conic-gradient(#a9d78d 0 ${approvedPercent}%, #f0c58f ${approvedPercent}% ${approvedPercent + aiPercent}%, #e9e9e5 ${approvedPercent + aiPercent}% 100%)`;
+            `conic-gradient(#a9d78d 0 ${approvedPercent}%, #f0c58f ${approvedPercent}% ${approvedPercent + aiPercent}%, #e57373 ${approvedPercent + aiPercent}% ${approvedPercent + aiPercent + rejectedPercent}%, #e9e9e5 ${approvedPercent + aiPercent + rejectedPercent}% 100%)`;
         }
 
         async function loadAssignments() {
@@ -1554,6 +1697,7 @@ th {
             statusBadge.className = `status ${item.status === "ai_evaluated" ? "ai" : item.status}`;
             statusBadge.textContent = {
               approved: "Approved",
+              rejected: "Rejected",
               ai_evaluated: "AI evaluated",
               pending: "Pending review",
             }[item.status];
@@ -1630,7 +1774,7 @@ th {
           try {
             const created = await api("/api/assignments", { method: "POST", body: form });
             assignmentDialog.close();
-            await refreshDashboard();
+            await Promise.all([refreshDashboard(), loadReportsSection(), loadAssignSubmissions()]);
             showFeedback(
               ["google_vision", "embedded_text_and_google_vision"].includes(created.ocr_method)
                 ? "Assignment uploaded, OCR completed, and shared with students."
@@ -1694,17 +1838,136 @@ th {
             document.getElementById("section-overview").classList.remove("active");
             document.getElementById("section-assignments").classList.remove("active");
             document.getElementById("section-students").classList.remove("active");
+            document.getElementById("section-reports").classList.remove("active");
             if (href === "#assignments") {
               document.getElementById("section-assignments").classList.add("active");
               loadAssignSubmissions();
             } else if (href === "#students") {
               document.getElementById("section-students").classList.add("active");
               loadStudentsSection();
+            } else if (href === "#reports") {
+              document.getElementById("section-reports").classList.add("active");
+              loadReportsSection();
             } else {
               document.getElementById("section-overview").classList.add("active");
             }
           });
         });
+
+        async function loadReportsSection() {
+          const params = new URLSearchParams({ limit: "200" });
+          const q = document.getElementById("rp-search").value.trim();
+          const subj = document.getElementById("rp-subject").value;
+          const asgn = document.getElementById("rp-assignment").value;
+          const st = document.getElementById("rp-status").value;
+          if (q) params.set("q", q);
+          if (st) params.set("status", st);
+          const [result, dashboard] = await Promise.all([
+            api(`/api/evaluations?${params}`),
+            api("/api/dashboard"),
+          ]);
+
+          // update donut
+          setText("rp-donut-total", dashboard.submissions);
+          setText("rp-approved", dashboard.approved);
+          setText("rp-ai", dashboard.ai_evaluated);
+          setText("rp-pending", dashboard.pending);
+          setText("rp-rejected", dashboard.rejected);
+          const ap = dashboard.submissions ? dashboard.approved * 100 / dashboard.submissions : 0;
+          const aip = dashboard.submissions ? dashboard.ai_evaluated * 100 / dashboard.submissions : 0;
+          const rejectedPercent = dashboard.submissions ? dashboard.rejected * 100 / dashboard.submissions : 0;
+          document.getElementById("rp-donut").style.background =
+            `conic-gradient(#7c3aed 0 ${ap}%, #c084fc ${ap}% ${ap + aip}%, #e57373 ${ap + aip}% ${ap + aip + rejectedPercent}%, #292532 ${ap + aip + rejectedPercent}% 100%)`;
+
+          // update bar chart
+          const perfResult = await api(`/api/performance?period=${encodeURIComponent(document.getElementById("rp-period").value)}`);
+          const subjects = new Map(perfResult.subjects.map((s) => [s.subject, s]));
+          document.querySelectorAll("#rp-bar-chart .bar-group[data-subject]").forEach((group) => {
+            const vals = subjects.get(group.dataset.subject) || { previous: 0, current: 0 };
+            group.querySelectorAll("[data-series]").forEach((bar) => {
+              bar.style.height = `${vals[bar.dataset.series]}%`;
+            });
+          });
+
+          // populate subject + assignment filters
+          let items = result.items;
+          const subjSel = document.getElementById("rp-subject");
+          const asgnSel = document.getElementById("rp-assignment");
+          const prevSubj = subjSel.value;
+          const prevAsgn = asgnSel.value;
+          const subjSet = new Set(items.map((i) => i.subject).filter(Boolean));
+          const asgnSet = new Set(items.map((i) => i.assignment_title).filter(Boolean));
+          subjSel.replaceChildren(new Option("All subjects", ""));
+          subjSet.forEach((s) => subjSel.append(new Option(s, s)));
+          if (prevSubj) subjSel.value = prevSubj;
+          asgnSel.replaceChildren(new Option("All assignments", ""));
+          asgnSet.forEach((a) => asgnSel.append(new Option(a, a)));
+          if (prevAsgn) asgnSel.value = prevAsgn;
+
+          // client-side filter by subject + assignment
+          if (subj) items = items.filter((i) => i.subject === subj);
+          if (asgn) items = items.filter((i) => i.assignment_title === asgn);
+
+          const tbody = document.getElementById("rp-body");
+          tbody.replaceChildren();
+          if (!items.length) {
+            const row = document.createElement("tr");
+            const cell = document.createElement("td"); cell.colSpan = 6; cell.textContent = "No results match these filters.";
+            row.append(cell); tbody.append(row); return;
+          }
+          for (const item of items) {
+            const row = document.createElement("tr");
+            [[item.student], [item.assignment_title], [item.subject || "—"],
+             [item.score === null ? "—" : `${item.score} / ${item.total_marks}`]].forEach(([t]) => {
+              const td = document.createElement("td"); td.textContent = t; row.append(td);
+            });
+            const statusTd = document.createElement("td");
+            const badge = document.createElement("span");
+            badge.className = `status ${item.status === "ai_evaluated" ? "ai" : item.status}`;
+            badge.textContent = { approved: "Approved", rejected: "Rejected", ai_evaluated: "AI evaluated", pending: "Pending review" }[item.status];
+            statusTd.append(badge); row.append(statusTd);
+            const actionTd = document.createElement("td");
+            actionTd.style.cssText = "display:flex;gap:6px;flex-wrap:wrap;";
+            if (item.status !== "approved") {
+              const approveBtn = document.createElement("button");
+              approveBtn.type = "button"; approveBtn.className = "table-action";
+              approveBtn.textContent = "Approve";
+              approveBtn.addEventListener("click", () => openReview(item));
+              actionTd.append(approveBtn);
+            }
+            const changeBtn = document.createElement("button");
+            changeBtn.type = "button"; changeBtn.className = "table-action";
+            changeBtn.textContent = "Change marks";
+            changeBtn.addEventListener("click", () => openReview(item));
+            actionTd.append(changeBtn);
+            if (item.status !== "rejected") {
+              const rejectBtn = document.createElement("button");
+              rejectBtn.type = "button"; rejectBtn.className = "table-action";
+              rejectBtn.style.color = "#f87171"; rejectBtn.style.borderColor = "#7f1d1d";
+              rejectBtn.textContent = "Reject";
+              rejectBtn.addEventListener("click", async () => {
+                try {
+                  await api(`/api/evaluations/${item.id}`, { method: "PATCH", body: JSON.stringify({ status: "rejected" }) });
+                  await Promise.all([refreshDashboard(), loadReportsSection(), loadAssignSubmissions()]);
+                  showFeedback("Grade rejected.");
+                } catch (e) { showFeedback(e.message, true); }
+              });
+              actionTd.append(rejectBtn);
+            }
+            row.append(actionTd);
+            tbody.append(row);
+          }
+        }
+
+        document.getElementById("rp-period").addEventListener("change", () => loadReportsSection());
+        let rpSearchTimer;
+        document.getElementById("rp-search").addEventListener("input", () => {
+          window.clearTimeout(rpSearchTimer);
+          rpSearchTimer = window.setTimeout(() => loadReportsSection(), 200);
+        });
+        ["rp-subject", "rp-assignment", "rp-status"].forEach((id) =>
+          document.getElementById(id).addEventListener("change", () => loadReportsSection())
+        );
 
         document.getElementById("inline-assignment-form").addEventListener("submit", async (event) => {
           event.preventDefault();
@@ -1777,7 +2040,7 @@ th {
           tbody.replaceChildren();
           if (!result.items.length) {
             const row = document.createElement("tr");
-            const cell = document.createElement("td"); cell.colSpan = 6; cell.textContent = "No submissions yet.";
+            const cell = document.createElement("td"); cell.colSpan = 5; cell.textContent = "No submissions yet.";
             row.append(cell); tbody.append(row); return;
           }
           for (const item of result.items) {
@@ -1788,18 +2051,9 @@ th {
             const statusTd = document.createElement("td");
             const badge = document.createElement("span");
             badge.className = `status ${item.status === "ai_evaluated" ? "ai" : item.status}`;
-            badge.textContent = { approved: "Approved", ai_evaluated: "AI evaluated", pending: "Pending review" }[item.status];
+            badge.textContent = { approved: "Approved", rejected: "Rejected", ai_evaluated: "AI evaluated", pending: "Pending review" }[item.status];
             statusTd.append(badge); row.append(statusTd);
             const timeTd = document.createElement("td"); timeTd.textContent = formatSubmitted(item.submitted_at); row.append(timeTd);
-            const actionTd = document.createElement("td");
-            if (item.status !== "approved") {
-              const btn = document.createElement("button");
-              btn.type = "button"; btn.className = "table-action";
-              btn.textContent = item.status === "pending" ? "Review" : "Approve";
-              btn.addEventListener("click", () => openReview(item));
-              actionTd.append(btn);
-            } else { actionTd.textContent = "—"; }
-            row.append(actionTd);
             tbody.append(row);
           }
         }

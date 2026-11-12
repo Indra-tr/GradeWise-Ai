@@ -1,5 +1,6 @@
 import json
 import os
+import sqlite3
 import tempfile
 import unittest
 from datetime import datetime, timedelta
@@ -190,9 +191,63 @@ class TeacherDashboardApiTests(unittest.TestCase):
         self.assertEqual(approval.status_code, 200)
         self.assertEqual(approval.get_json()["status"], "approved")
 
+        rejection = self.client.patch(
+            f"/api/evaluations/{pending['id']}",
+            json={"status": "rejected"},
+        )
+        self.assertEqual(rejection.status_code, 200)
+        self.assertEqual(rejection.get_json()["status"], "rejected")
+        rejected = self.client.get("/api/evaluations?status=rejected").get_json()["items"]
+        self.assertEqual(rejected[0]["score"], 18)
+
         dashboard = self.client.get("/api/dashboard").get_json()
         self.assertEqual(dashboard["pending"], 1)
-        self.assertEqual(dashboard["approved"], 16)
+        self.assertEqual(dashboard["approved"], 15)
+        self.assertEqual(dashboard["rejected"], 1)
+
+    def test_existing_database_migrates_to_allow_rejected_evaluations(self):
+        database_path = Path(self.temporary_directory.name) / "legacy.sqlite3"
+        connection = sqlite3.connect(database_path)
+        with connection:
+            connection.executescript(
+                """
+                CREATE TABLE assignments (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    title TEXT NOT NULL,
+                    subject TEXT NOT NULL,
+                    due_date TEXT,
+                    total_marks INTEGER NOT NULL,
+                    created_at TEXT NOT NULL
+                );
+                CREATE TABLE evaluations (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    assignment_id INTEGER NOT NULL REFERENCES assignments(id),
+                    student TEXT NOT NULL,
+                    score REAL,
+                    status TEXT NOT NULL CHECK (
+                        status IN ('approved', 'ai_evaluated', 'pending')
+                    ),
+                    submitted_at TEXT NOT NULL,
+                    CHECK (score IS NULL OR score >= 0)
+                );
+                INSERT INTO assignments
+                    (id, title, subject, total_marks, created_at)
+                VALUES (1, 'Quiz', 'Maths', 20, '2026-01-01');
+                INSERT INTO evaluations
+                    (id, assignment_id, student, score, status, submitted_at)
+                VALUES (1, 1, 'Student', 12, 'pending', '2026-01-02');
+                """
+            )
+        connection.close()
+
+        legacy_app = create_app(database_path)
+        legacy_app.testing = True
+        response = legacy_app.test_client().patch(
+            "/api/evaluations/1",
+            json={"status": "rejected"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.get_json()["score"], 12)
 
     def test_performance_endpoint_supports_reporting_periods(self):
         for period in ("month", "3months", "semester"):
