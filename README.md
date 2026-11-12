@@ -1,29 +1,28 @@
 # GradeWise - AI
 
-### AI-Powered Subjective Answer Evaluation System
+### Teacher Dashboard
 
-GradeWise - AI is an AI-assisted platform designed to automate subjective answer evaluation using Artificial Intelligence, Natural Language Processing, and Machine Learning.
-
-The system evaluates student answers using reference answers, semantic similarity, and predefined marking rubrics. It generates marks, detailed feedback, and performance insights to help teachers assess students more efficiently.
-
-The application uses **HTML, CSS, and JavaScript** for the frontend and **Python Flask** for the backend.
+The current runnable app is a teacher dashboard for assignment management,
+evaluation review, grade approval, and performance charts. It uses Flask with
+SQLite locally or Supabase when configured. Supabase Auth provides Student and
+Teacher sign-up and login. Teachers can upload assignment PDFs; the backend
+stores the PDF in a private Supabase Storage bucket, extracts text with Google
+Cloud Vision for scanned pages, saves the OCR text with the assignment row, and
+shows the assignment and a temporary PDF link to students.
 
 ---
 
 ## Features
 
-- AI-powered subjective answer evaluation
-- Semantic similarity analysis
-- Rubric-based grading
-- Reference answer comparison
-- PDF answer sheet upload
-- Automated marks calculation
-- Personalized student feedback
-- Teacher evaluation dashboard
-- Student performance dashboard
-- Evaluation reports and analytics
-- Database-based data management
-- Teacher review and grade approval
+- Assignment creation
+- Assignment PDF upload to private Supabase Storage
+- Google Vision document OCR for scanned PDF pages
+- Student assignment list with secure PDF links and extracted-text preview
+- Evaluation search and status filtering
+- Grade review and approval
+- Dashboard metrics and reporting-period charts
+- Student and Teacher account sign-up/login when Supabase is configured
+- SQLite local fallback or Supabase persistence
 
 ---
 
@@ -37,23 +36,16 @@ The application uses **HTML, CSS, and JavaScript** for the frontend and **Python
 | CSS3 | Styling and responsive design |
 | JavaScript | Frontend interactions and API requests |
 
-### Backend and AI
+### Backend and persistence
 
 | Technology | Purpose |
 |---|---|
-| Python | Core backend programming |
-| Flask | Web framework and API development |
-| Google Gemini API | AI-based answer evaluation |
-| Sentence Transformers | Semantic similarity |
-| Scikit-learn | Machine learning utilities |
-| NumPy | Numerical calculations |
-| Pandas | Data processing |
-| PyMuPDF | PDF text extraction |
-| Pillow | Image processing |
-| Plotly | Interactive charts |
-| SQLAlchemy | Database management |
-| Pydantic | Data validation |
-| Python Dotenv | Environment variable management |
+| Python and Flask | Backend and API |
+| SQLite | Local fallback database |
+| Supabase PostgREST | Hosted database API |
+| Supabase Storage | Private assignment PDF storage |
+| Google Cloud Vision REST API | OCR for scanned PDF pages |
+| Python Dotenv | Server-side environment configuration |
 
 ---
 
@@ -63,29 +55,18 @@ The application uses **HTML, CSS, and JavaScript** for the frontend and **Python
 GradeWise-AI/
 │
 ├── app.py
-├── grading.py
-├── db.py
-├── document_parser.py
-├── reports.py
-│
-├── templates/
-│   └── index.html
-│
-├── static/
-│   ├── css/
-│   │   └── style.css
-│   │
-│   ├── js/
-│   │   └── script.js
-│   │
-│   └── images/
-│
-├── data/
-│   └── database.db
-│
-├── requirements.txt
-├── .env
+├── teacher.html
+├── student.html
+├── index.html
+├── styles.css
 ├── .env.example
+├── backend/
+│   └── google_vision_ocr.py
+├── supabase/
+│   └── schema.sql
+├── tests/
+│   └── test_app.py
+├── requirements.txt
 ├── .gitignore
 └── README.md
 ```
@@ -96,8 +77,8 @@ GradeWise-AI/
 
 - Python 3.10 or newer
 - Visual Studio Code
-- Internet connection
-- Google Gemini API key
+- Internet connection only when using Supabase
+- Google Cloud Vision API enabled in the Google Cloud project for scanned PDFs
 
 ---
 
@@ -138,22 +119,11 @@ python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-### Step 5: Configure Gemini API
+### Step 5: Configure the database
 
-Create a `.env` file in the project root directory.
-
-Add your Gemini API key:
-
-```env
-GEMINI_API_KEY=your_actual_api_key
-GEMINI_MODEL=gemini-2.5-flash
-```
-
-Get your API key from:
-
-https://aistudio.google.com/apikey
-
-**Important:** Never upload your actual API key to GitHub.
+The dashboard uses SQLite locally by default. To use Supabase instead, follow the
+Supabase setup below. Do not put database keys in frontend code or commit your
+`.env` file.
 
 ### Step 6: Run the Application
 
@@ -175,78 +145,124 @@ Open the application in your browser:
 http://127.0.0.1:5000
 ```
 
+### Current dashboards
+
+The current dashboard is served by `app.py`. When Supabase is configured, its API
+uses the Supabase database and authentication; otherwise it uses SQLite for
+persistent local development data.
+Install dependencies and run:
+
+```bash
+python -m pip install -r requirements.txt
+python app.py
+```
+
+Open `http://127.0.0.1:5000` for the sign-in page. Choose Teacher or Student and
+then log in or create an account. When Supabase is not configured, the SQLite
+demo accepts Teacher `admin` / `123` and Student `student` / `123`; local sign-up
+is unavailable. In SQLite mode, the database is created at
+`data/gradewise.sqlite3` on first run and seeded with demonstration assignments
+and evaluations. These fixed demo accounts are only for local testing, not real
+student data. Creating assignments and approving grades update the selected
+database.
+
+The dashboard supports assignment PDF uploads, evaluation search and status
+filtering, grade approval, and reporting-period charts. Uploaded assignments
+are immediately listed in the student dashboard. Assignment PDFs are kept in a
+private Storage bucket and delivered through short-lived signed links. Google
+Vision OCR runs on pages without selectable text; searchable PDF text is
+extracted locally. AI grading and student answer submissions are not part of
+this upload flow.
+Supabase authentication and role checks apply when Supabase is configured. The
+`GRADEWISE_DEMO_AUTH` switch is intended only for controlled local testing;
+disabling it leaves the SQLite fallback without account protection.
+
+Run the backend tests with:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+### Supabase setup
+
+1. Create a Supabase project and open its SQL Editor.
+2. Run the updated schema in [`supabase/schema.sql`](./supabase/schema.sql). It
+   adds the assignment file/OCR columns and creates a private `assignments`
+   Storage bucket. It is safe to run on the existing assignments/evaluations
+   tables.
+3. In the Supabase dashboard, copy the project URL, anon key, and service-role
+   key. Add them to `.env` as `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and
+   `SUPABASE_SERVICE_ROLE_KEY`. If `.env` already exists, add the missing keys;
+   do not replace its existing values.
+4. Restart `python app.py`. Supabase mode is enabled only when all three values
+   are present. The service-role key remains server-side.
+
+### Google Vision OCR setup
+
+1. Enable the Cloud Vision API in your Google Cloud project and create an API
+   key.
+2. Add `GOOGLE_VISION_API_KEY=...` to the server `.env`. Restrict the key to
+   the Cloud Vision API and keep it out of HTML, JavaScript, and source control.
+3. Install the updated Python dependencies with `pip install -r requirements.txt`.
+
+The upload endpoint sends each scanned PDF page as a base64 image to Vision's
+`images:annotate` endpoint with `DOCUMENT_TEXT_DETECTION`. PDFs with selectable
+text use local extraction and do not make Vision calls. Vision API usage may
+incur Google Cloud charges. The browser never receives the API key.
+
+`POST /api/assignments` accepts multipart fields `title`, `subject`, optional
+`due_date`, `total_marks`, and the PDF field `assignment_file`. It returns the
+created assignment, OCR method, text excerpt, and a same-origin file route.
+`GET /api/assignments` lists assignments for both dashboards;
+`GET /api/assignments/<id>/file` returns the local PDF or redirects to a
+15-minute Supabase signed URL.
+
+Teacher and Student accounts use Supabase Auth email/password. Supabase email
+confirmation settings apply. Teacher self-sign-up is enabled, so anyone can
+create a Teacher account. Roles are assigned server-side in protected Auth app
+metadata. Students have read-only access to evaluations whose `student_id`
+matches their `auth.users.id`; existing demo rows are not automatically linked
+to accounts.
+
+The service-role key must remain server-side and must never be added to
+`teacher.html`, `student.html`, `index.html`, or source control. If all three
+Supabase settings are unset, the app continues using SQLite; if only some are
+set, startup stops with a configuration error. The local SQLite database is
+retained as a fallback and is not automatically copied to Supabase.
+
 ---
 
-## System Workflow
+## Current database model
 
-1. Teacher creates an assignment with questions.
-2. Teacher provides reference answers and marking rubrics.
-3. Student submits answers using text input or PDF upload.
-4. The backend extracts text from submitted PDF documents.
-5. Semantic analysis compares the student's answer with reference material.
-6. Gemini AI evaluates the answer based on the marking rubric.
-7. The system generates marks and personalized feedback.
-8. Teacher reviews and approves the generated evaluation.
-9. Students can view their approved marks and feedback.
+`assignments` stores title, subject, due date, marks, uploader, PDF Storage path,
+OCR text, OCR method, and file metadata. `evaluations` remains linked to
+assignments by `assignment_id`. Supabase uses `supabase/schema.sql`; the SQLite
+fallback adds the upload columns automatically and stores local PDFs under
+`data/assignment_uploads/`. Existing SQLite demo records are not copied to
+Supabase.
 
 ---
 
-## AI and Machine Learning
+## Security
 
-GradeWise - AI uses the following technologies:
-
-**Google Gemini API**
-- AI-based answer analysis.
-- Rubric-based evaluation.
-- Personalized feedback generation.
-
-**Sentence Transformers**
-- Converts text into semantic embeddings.
-- Helps identify meaning and context similarities.
-
-**Scikit-learn**
-- Similarity calculations.
-- Machine learning utilities.
-
-**NumPy**
-- Numerical operations and calculations.
-
-**Pydantic**
-- Validation of structured evaluation results.
-
----
-
-## Database Management
-
-SQLAlchemy is used for database interaction and management.
-
-The database stores:
-
-- Student information
-- Teacher information
-- Assignment details
-- Questions and reference answers
-- Marking rubrics
-- Student submissions
-- Evaluation results
-- Teacher feedback
-
----
-
-## Security and Responsible AI
-
-- Gemini API keys are stored securely in environment variables.
-- API calls are handled by the Python backend.
-- Student and teacher access should use authentication and authorization.
-- Uploaded documents should be validated.
-- AI-generated marks are provisional until approved by a teacher.
-- Student information should be protected.
+- The Supabase service-role key is read only by the Flask backend.
+- Assignment PDFs are stored in a private bucket; student links expire after 15 minutes.
+- Restrict the Google Vision key to the Vision API and keep it only in `.env`.
+- Row-level security is enabled in the supplied schema; no browser policies are
+  added because the dashboard accesses Supabase through Flask after checking
+  the authenticated role.
+- Session tokens are stored in HttpOnly cookies.
+- The local demo uses fixed, intentionally weak credentials and is not secure
+  for real data or public deployment. Configure Supabase Auth for real accounts.
+- Teacher self-sign-up is enabled; add an invitation or approval process before
+  exposing the app publicly if unrestricted Teacher accounts are not acceptable.
+- Students can only view records linked to their Supabase user ID and cannot
+  create assignments or approve grades.
 
 ---
 
 ## Future Enhancements
 
-- Handwritten answer recognition using OCR.
 - Multilingual answer evaluation.
 - Advanced machine learning grading models.
 - Student performance prediction.
@@ -257,9 +273,9 @@ The database stores:
 
 ## Important Disclaimer
 
-GradeWise - AI is designed as an AI-assisted academic evaluation platform.
-
-AI-generated marks and feedback should be reviewed by teachers before final approval. The system supports human academic judgment rather than replacing it.
+Teacher assignment uploads, PDF storage, Google Vision OCR, and student access to
+published assignments are implemented. Automatic grading of student answer
+submissions is not part of this version.
 
 ---
 
