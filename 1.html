@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f5f6f5" />
+    <title>GradeWise - Sign in</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #17191b;
+        --muted: #737a7d;
+        --line: #e7eae7;
+        --paper: #fff;
+        --canvas: #f5f6f5;
+        --green: #a9d78d;
+        --green-deep: #416d3b;
+        --shadow: 0 18px 55px rgba(27, 38, 30, 0.08);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        padding: 32px 18px;
+        display: grid;
+        place-items: center;
+        background:
+          radial-gradient(circle at 12% 8%, rgba(201, 238, 204, 0.56), transparent 30rem),
+          radial-gradient(circle at 91% 88%, rgba(250, 220, 187, 0.48), transparent 28rem),
+          var(--canvas);
+        color: var(--ink);
+        font-family: "DM Sans", sans-serif;
+      }
+
+      button,
+      input {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      .auth-shell {
+        width: min(940px, 100%);
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 11px;
+        margin-bottom: 30px;
+      }
+
+      .brand-mark {
+        width: 42px;
+        height: 42px;
+        display: grid;
+        place-items: center;
+        border-radius: 15px;
+        background: linear-gradient(135deg, #c8f3d1, #f8d7b5);
+        font-size: 23px;
+      }
+
+      .brand-name {
+        font: 800 22px "Manrope", sans-serif;
+        letter-spacing: -0.8px;
+      }
+
+      .brand-name span {
+        color: #82a873;
+      }
+
+      .intro {
+        margin: 0 auto 27px;
+        text-align: center;
+      }
+
+      .eyebrow {
+        margin: 0 0 8px;
+        color: #78906f;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1.8px;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        margin-bottom: 8px;
+        font: 700 clamp(27px, 4vw, 36px) "Manrope", sans-serif;
+        letter-spacing: -1.2px;
+      }
+
+      .intro-copy {
+        margin-bottom: 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .role-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+      }
+
+      .role-card,
+      .auth-panel {
+        border: 1px solid rgba(226, 231, 226, 0.9);
+        border-radius: 22px;
+        background: rgba(255, 255, 255, 0.94);
+        box-shadow: var(--shadow);
+      }
+
+      .role-card {
+        padding: 25px;
+      }
+
+      .role-icon {
+        width: 43px;
+        height: 43px;
+        display: grid;
+        place-items: center;
+        margin-bottom: 17px;
+        border-radius: 15px;
+        background: #edf6e9;
+        color: var(--green-deep);
+        font-size: 20px;
+      }
+
+      .role-card.teacher .role-icon {
+        background: #fff1e2;
+        color: #9c6632;
+      }
+
+      .role-card h2 {
+        margin-bottom: 6px;
+        font: 700 20px "Manrope", sans-serif;
+      }
+
+      .role-card p {
+        min-height: 42px;
+        margin-bottom: 20px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.6;
+      }
+
+      .role-actions {
+        display: flex;
+        gap: 10px;
+      }
+
+      .button {
+        min-height: 43px;
+        padding: 0 16px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--paper);
+        color: var(--ink);
+        font-size: 13px;
+        font-weight: 700;
+        transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+      }
+
+      .button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 7px 18px rgba(24, 35, 25, 0.08);
+      }
+
+      .button.primary {
+        border-color: #182019;
+        background: #182019;
+        color: #fff;
+      }
+
+      .button:focus-visible,
+      input:focus-visible {
+        outline: 3px solid rgba(124, 169, 105, 0.35);
+        outline-offset: 2px;
+      }
+
+      .auth-panel {
+        width: min(480px, 100%);
+        margin: 21px auto 0;
+        padding: 25px;
+      }
+
+      .auth-heading {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+
+      .auth-heading h2 {
+        margin-bottom: 5px;
+        font: 700 20px "Manrope", sans-serif;
+      }
+
+      .auth-heading p {
+        margin-bottom: 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .close-button {
+        width: 34px;
+        height: 34px;
+        border: 1px solid var(--line);
+        border-radius: 50%;
+        background: #fff;
+        color: var(--muted);
+        font-size: 20px;
+        line-height: 1;
+      }
+
+      .field {
+        display: grid;
+        gap: 7px;
+        margin-bottom: 15px;
+      }
+
+      .field[hidden] {
+        display: none;
+      }
+
+      .field label {
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .field input {
+        width: 100%;
+        height: 45px;
+        padding: 0 13px;
+        border: 1px solid var(--line);
+        border-radius: 11px;
+        background: #fff;
+        color: var(--ink);
+      }
+
+      .form-submit {
+        width: 100%;
+        margin-top: 3px;
+      }
+
+      .form-message {
+        min-height: 20px;
+        margin: 13px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .form-message.error {
+        color: #a63d32;
+      }
+
+      .form-message.success {
+        color: #416d3b;
+      }
+
+      .system-message {
+        margin: 16px 0 0;
+        color: #737a7d;
+        font-size: 12px;
+        line-height: 1.5;
+        text-align: center;
+      }
+
+      .system-message.error {
+        color: #a63d32;
+      }
+
+      .system-message.info {
+        color: #765b2f;
+      }
+
+      .security-note {
+        margin: 21px 0 0;
+        color: #818784;
+        font-size: 11px;
+        line-height: 1.6;
+        text-align: center;
+      }
+
+      @media (max-width: 620px) {
+        body {
+          padding: 25px 14px;
+          align-items: start;
+        }
+
+        .role-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .role-card {
+          padding: 21px;
+        }
+
+        .role-card p {
+          min-height: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="auth-shell">
+      <header class="brand" aria-label="GradeWise">
+        <div class="brand-mark" aria-hidden="true">✦</div>
+        <div class="brand-name">GradeWise<span> - AI</span></div>
+      </header>
+
+      <section class="intro">
+        <p class="eyebrow">Welcome</p>
+        <h1>Choose how you want to continue</h1>
+        <p class="intro-copy">Select your account type to log in or create an account.</p>
+      </section>
+
+      <section class="role-grid" aria-label="Account types">
+        <article class="role-card student">
+          <div class="role-icon" aria-hidden="true">◉</div>
+          <h2>Student</h2>
+          <p>Sign in to view your assignments and personal evaluation results.</p>
+          <div class="role-actions">
+            <button class="button primary" type="button" data-role="student" data-mode="login">Log in</button>
+            <button class="button" type="button" data-role="student" data-mode="signup">Sign up</button>
+          </div>
+        </article>
+
+        <article class="role-card teacher">
+          <div class="role-icon" aria-hidden="true">▤</div>
+          <h2>Teacher</h2>
+          <p>Sign in to manage assignments, review evaluations and approve grades.</p>
+          <div class="role-actions">
+            <button class="button primary" type="button" data-role="teacher" data-mode="login">Log in</button>
+            <button class="button" type="button" data-role="teacher" data-mode="signup">Sign up</button>
+          </div>
+        </article>
+      </section>
+      <p class="system-message" id="system-message" role="status"></p>
+
+      <section class="auth-panel" id="auth-panel" aria-live="polite" hidden>
+        <div class="auth-heading">
+          <div>
+            <h2 id="form-title">Log in</h2>
+            <p id="form-description"></p>
+          </div>
+          <button class="close-button" id="close-form" type="button" aria-label="Close form">×</button>
+        </div>
+        <form id="auth-form">
+          <div class="field" id="name-field" hidden>
+            <label for="full-name">Full name</label>
+            <input id="full-name" name="full_name" type="text" autocomplete="name" maxlength="120" />
+          </div>
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="text" inputmode="email" autocomplete="username" maxlength="254" required />
+          </div>
+          <div class="field">
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" autocomplete="current-password" maxlength="128" required />
+          </div>
+          <button class="button primary form-submit" id="submit-auth" type="submit">Log in</button>
+          <p class="form-message" id="form-message" role="status"></p>
+        </form>
+      </section>
+
+      <p class="security-note" id="security-note">Student accounts can only view their own linked evaluation records when Supabase is configured.</p>
+    </main>
+
+    <script>
+      (() => {
+        const panel = document.getElementById("auth-panel");
+        const form = document.getElementById("auth-form");
+        const nameField = document.getElementById("name-field");
+        const fullName = document.getElementById("full-name");
+        const email = document.getElementById("email");
+        const password = document.getElementById("password");
+        const title = document.getElementById("form-title");
+        const description = document.getElementById("form-description");
+        const submitButton = document.getElementById("submit-auth");
+        const message = document.getElementById("form-message");
+        const systemMessage = document.getElementById("system-message");
+        const securityNote = document.getElementById("security-note");
+        let selectedRole = "";
+        let selectedMode = "";
+
+        function showMessage(text, kind = "") {
+          message.textContent = text;
+          message.className = `form-message ${kind}`.trim();
+        }
+
+        function openForm(role, mode) {
+          selectedRole = role;
+          selectedMode = mode;
+          form.reset();
+          panel.hidden = false;
+          nameField.hidden = mode !== "signup";
+          fullName.required = mode === "signup";
+          password.autocomplete = mode === "signup" ? "new-password" : "current-password";
+          title.textContent = `${mode === "signup" ? "Sign up" : "Log in"} as ${role}`;
+          description.textContent = mode === "signup"
+            ? `Create your ${role} account with your email and password.`
+            : `Enter the email and password for your ${role} account.`;
+          submitButton.textContent = mode === "signup" ? "Create account" : "Log in";
+          showMessage("");
+          panel.scrollIntoView({ behavior: "smooth", block: "center" });
+          (mode === "signup" ? fullName : email).focus();
+        }
+
+        document.querySelectorAll("[data-role][data-mode]").forEach((button) => {
+          button.addEventListener("click", () => {
+            openForm(button.dataset.role, button.dataset.mode);
+          });
+        });
+
+        document.getElementById("close-form").addEventListener("click", () => {
+          panel.hidden = true;
+          showMessage("");
+        });
+
+        form.addEventListener("submit", async (event) => {
+          event.preventDefault();
+          submitButton.disabled = true;
+          showMessage("");
+          const payload = {
+            role: selectedRole,
+            email: email.value.trim(),
+            password: password.value,
+          };
+          if (selectedMode === "signup") payload.full_name = fullName.value.trim();
+
+          try {
+            const response = await fetch(`/api/auth/${selectedMode}`, {
+              method: "POST",
+              credentials: "same-origin",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            });
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok) {
+              throw new Error(result.error || `Request failed (${response.status}).`);
+            }
+            if (result.authenticated || selectedMode === "login") {
+              window.location.assign(result.redirect_url);
+              return;
+            }
+            showMessage(result.message, "success");
+            openForm(selectedRole, "login");
+            email.value = payload.email;
+            showMessage(result.message, "success");
+          } catch (error) {
+            showMessage(error.message, "error");
+          } finally {
+            submitButton.disabled = false;
+          }
+        });
+
+        async function redirectExistingSession() {
+          try {
+            let response = await fetch("/api/auth/me", { credentials: "same-origin" });
+            if (response.status === 401) {
+              const refreshed = await fetch("/api/auth/refresh", {
+                method: "POST",
+                credentials: "same-origin",
+              });
+              if (refreshed.ok) {
+                response = await fetch("/api/auth/me", { credentials: "same-origin" });
+              }
+            }
+            const result = await response.json().catch(() => ({}));
+            if (result.auth_enabled === false) {
+              systemMessage.textContent =
+                "Authentication is not configured. Add SUPABASE_URL, SUPABASE_ANON_KEY, and SUPABASE_SERVICE_ROLE_KEY to .env, then restart the app.";
+              systemMessage.classList.add("error");
+              return;
+            }
+            if (result.demo_mode) {
+              systemMessage.textContent =
+                "Local demo login: Teacher admin / 123; Student student / 123. Do not use this mode with real data.";
+              systemMessage.classList.add("info");
+              securityNote.textContent =
+                "These fixed demo accounts are for local testing only. Configure Supabase Auth before using real student data.";
+              if (result.authenticated && result.redirect_url) {
+                window.location.replace(result.redirect_url);
+              }
+              return;
+            }
+            if (response.ok && result.redirect_url) {
+              window.location.replace(result.redirect_url);
+            } else if (response.status >= 500) {
+              systemMessage.textContent =
+                result.error || "Authentication is temporarily unavailable.";
+              systemMessage.classList.add("error");
+            }
+          } catch (_error) {
+            systemMessage.textContent = "Could not reach the server. Start the GradeWise app and try again.";
+            systemMessage.classList.add("error");
+          }
+        }
+
+        redirectExistingSession();
+      })();
+    </script>
+  </body>
+</html>

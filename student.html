@@ -1,0 +1,1636 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GradeWise - AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+:root {
+  --ink: #f5f3ff;
+  --muted: #a59bb5;
+  --line: #292532;
+  --paper: #111116;
+  --canvas: #08080b;
+  --green: #9b59d0;
+  --green-deep: #7b3db0;
+  --orange: #c084fc;
+  --orange-deep: #a855f7;
+  --gray: #292532;
+  --shadow: rgba(120, 60, 200, 0.15);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+.page-shell {
+  width: min(1480px, 100%);
+}
+
+.topbar {
+  position: sticky;
+  top: 20px;
+  z-index: 20;
+  background: rgba(17, 17, 22, 0.95);
+  border: 1px solid #292532;
+  border-radius: 22px;
+  padding: 13px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 25px;
+  box-shadow: 0 4px 18px var(--shadow);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 210px;
+}
+
+.brand-mark {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #7c3aed, #c084fc);
+  color: #fff;
+  font-size: 19px;
+  font-weight: 800;
+}
+
+.brand-name {
+  font: 800 18px 'Manrope', sans-serif;
+  letter-spacing: -0.7px;
+}
+
+.brand-name span {
+  color: #a855f7;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+.nav-pill {
+  padding: 10px 17px;
+  border-radius: 30px;
+  color: #a49bad;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.nav-pill.active {
+  background: #7c3aed;
+  color: #fff;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #a49bad;
+}
+
+.nav-icon {
+  width: 34px;
+  height: 34px;
+  border: 1px solid #292532;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #111116;
+  color: #a78bca;
+}
+
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  color: #fff;
+}
+
+.page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin: 3px 2px 17px;
+  gap: 20px;
+}
+
+.eyebrow {
+  font-size: 11px;
+  color: #9a9da1;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+h1 {
+  font: 700 27px 'Manrope', sans-serif;
+  letter-spacing: -1px;
+  margin: 3px 0 4px;
+}
+
+.page-sub {
+  font-size: 12px;
+  color: #92969a;
+  margin: 0;
+}
+
+.view-select {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  border-radius: 18px;
+  background: #111116;
+  border: 1px solid #292532;
+}
+
+.view-select label {
+  font-size: 12px;
+  color: #6a6e73;
+}
+
+.view-select select,
+.mini-dropdown select {
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  outline: none;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: 2.2fr 1fr 1fr 1fr;
+  gap: 18px;
+  margin-bottom: 20px;
+}
+
+.card {
+  background: #111116;
+  border: 1px solid #292532;
+  border-radius: 20px;
+  padding: 19px 20px;
+  box-shadow: 0 4px 18px var(--shadow);
+  height: 100%;
+}
+
+.metric-card {
+  min-height: 160px;
+  position: relative;
+}
+
+.hero-card {
+  background: linear-gradient(115deg, #16101f 0%, #211437 52%, #120d19 100%);
+  border-radius: 20px;
+  padding: 23px 25px;
+  min-height: 178px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #3b2b50;
+}
+
+.hero-card::after {
+  content: '';
+  position: absolute;
+  width: 230px;
+  height: 230px;
+  right: -45px;
+  top: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(168, 85, 247, 0));
+}
+
+.hero-kicker {
+  font-size: 11px;
+  color: #6d7770;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-card h2 {
+  font: 700 27px 'Manrope', sans-serif;
+  letter-spacing: -1.1px;
+  margin: 7px 0 2px;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-card p {
+  font-size: 12px;
+  color: #69736d;
+  margin: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-bottom {
+  display: flex;
+  gap: 32px;
+  margin-top: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-stat strong {
+  display: block;
+  font: 700 21px 'Manrope', sans-serif;
+}
+
+.hero-stat span {
+  font-size: 10px;
+  color: #7e8580;
+}
+
+.metric-card.soft-blue {
+  background: linear-gradient(120deg, #0b0b13, #171124);
+  border: 1px solid #2a1f50;
+}
+
+.metric-card.soft-green {
+  background: linear-gradient(120deg, #100c18, #181021);
+  border: 1px solid #3b2b50;
+}
+
+.metric-card.soft-peach {
+  background: linear-gradient(120deg, #16101f, #20122d);
+  border: 1px solid #4a1f7a;
+}
+
+.metric-dot {
+  float: right;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  background: rgba(124, 58, 237, 0.18);
+  color: #a855f7;
+}
+
+.metric-label {
+  font-size: 11px;
+  color: #92889f;
+  margin-bottom: 9px;
+}
+
+.metric-value {
+  font: 700 31px 'Manrope', sans-serif;
+  letter-spacing: -1.5px;
+  line-height: 1;
+}
+
+.metric-foot {
+  font-size: 10px;
+  color: #7d8580;
+  margin-top: 10px;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: 1.62fr 1fr;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.card-title {
+  font: 700 14px 'Manrope', sans-serif;
+  margin: 0 0 5px;
+  letter-spacing: -0.25px;
+}
+
+.card-sub {
+  font-size: 10px;
+  color: #999da1;
+}
+
+.chart-panel,
+.donut-panel,
+.list-panel,
+.insight-card,
+.quick-action {
+  min-height: 260px;
+}
+
+.mini-dropdown {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  color: #aaa1b5;
+  background: #111116;
+  border: 1px solid #292532;
+  border-radius: 14px;
+  padding: 8px 10px;
+}
+
+.chart-wrap {
+  margin-top: 12px;
+}
+
+.chart-legend {
+  display: flex;
+  justify-content: flex-end;
+  gap: 14px;
+  font-size: 10px;
+  color: #757a7d;
+  margin-bottom: 8px;
+}
+
+.legend-swatch {
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+  border-radius: 3px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.legend-swatch.prev {
+  background: #5b21b6;
+}
+
+.legend-swatch.current {
+  background: #a855f7;
+}
+
+.bar-chart {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+  height: 220px;
+  padding: 12px 8px 0;
+  border-bottom: 1px solid #292532;
+}
+
+.bar-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: end;
+  gap: 8px;
+  height: 100%;
+}
+
+.bars {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 5px;
+  height: 180px;
+}
+
+.bar {
+  display: inline-block;
+  width: 18px;
+  min-height: 10px;
+  border-radius: 10px 10px 0 0;
+}
+
+.bar.prev {
+  background: #5b21b6;
+}
+
+.bar.current {
+  background: #a855f7;
+}
+
+.bar-group label {
+  font-size: 10px;
+  color: #7c7d7d;
+}
+
+.donut-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.donut-chart {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: conic-gradient(
+    #7c3aed 0 59.7%,
+    #c084fc 59.7% 77.3%,
+    #292532 77.3% 100%
+  );
+  position: relative;
+  margin: 8px 0;
+}
+
+.donut-chart::before {
+  content: '';
+  position: absolute;
+  inset: 28px;
+  background: #111116;
+  border-radius: 50%;
+}
+
+.donut-center {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  z-index: 1;
+}
+
+.donut-center strong {
+  font-size: 29px;
+  font-family: 'Manrope', sans-serif;
+  letter-spacing: -1px;
+}
+
+.donut-center span {
+  font-size: 10px;
+  color: #888;
+}
+
+.donut-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 11px;
+  color: #4d5657;
+}
+
+.donut-legend > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.dot.green { background: #7c3aed; }
+.dot.orange { background: #c084fc; }
+.dot.gray { background: #292532; }
+
+.bottom-grid {
+  display: grid;
+  grid-template-columns: 1.62fr 1fr;
+  gap: 18px;
+  align-items: start;
+}
+
+.ghost-btn,
+.primary-btn {
+  border: 1px solid #3b2b50;
+  border-radius: 25px;
+  background: #111116;
+  color: #c084fc;
+  font-size: 11px;
+  padding: 8px 15px;
+  cursor: pointer;
+}
+
+.primary-btn {
+  width: 100%;
+  margin-top: 16px;
+  background: #7c3aed;
+  color: #fff;
+  border-color: #7c3aed;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+  overflow: hidden;
+  border-radius: 14px;
+}
+
+th, td {
+  padding: 12px 10px;
+  text-align: left;
+  border-bottom: 1px solid #292532;
+  font-size: 12px;
+  color: #c4b8d8;
+}
+
+th {
+  color: #aaa1b5;
+  font-size: 11px;
+  font-weight: 700;
+  background: #0c0c11;
+}
+
+.status {
+  display: inline-block;
+  padding: 5px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.status.approved {
+  background: #16101f;
+  color: #a855f7;
+  border: 1px solid #7c3aed;
+}
+
+.status.pending {
+  background: #120d19;
+  color: #c084fc;
+  border: 1px solid #5b21b6;
+}
+
+.status.ai {
+  background: #0b0b13;
+  color: #818cf8;
+  border: 1px solid #3730a3;
+}
+
+.right-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.insight-card {
+  background: linear-gradient(120deg, #16101f, #211437);
+  border-radius: 18px;
+  padding: 18px;
+  min-height: 260px;
+  border: 1px solid #3b2b50;
+}
+
+.insight-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.insight-title {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.tag {
+  font-size: 9px;
+  padding: 5px 9px;
+  border-radius: 20px;
+  background: #292532;
+  color: #ad95cb;
+}
+
+.insight-card h3 {
+  font: 700 21px 'Manrope', sans-serif;
+  letter-spacing: -0.7px;
+  margin-top: 20px;
+}
+
+.insight-card p {
+  font-size: 11px;
+  color: #6e7169;
+  margin-top: 7px;
+  line-height: 1.6;
+}
+
+.progress-track {
+  height: 7px;
+  border-radius: 9px;
+  background: #292532;
+  overflow: hidden;
+  margin-top: 15px;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 9px;
+  background: linear-gradient(90deg, #7c3aed, #c084fc);
+}
+
+.small-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  margin-top: 12px;
+  color: #656b6e;
+}
+
+.quick-action {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: linear-gradient(120deg, #100c18, #181021);
+  border: 1px solid #3b2b50;
+}
+
+.assignment-list {
+  display: grid;
+  gap: 9px;
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+}
+
+.assignment-list li {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  border-top: 1px solid rgba(80, 100, 70, 0.12);
+  padding-top: 9px;
+  font-size: 11px;
+}
+
+.assignment-list li strong {
+  font-weight: 600;
+}
+
+.assignment-list li span {
+  color: #788078;
+  font-size: 10px;
+}
+
+.footer-note {
+  text-align: center;
+  color: #a4a7a5;
+  font-size: 10px;
+  padding: 25px 0 5px;
+}
+
+@media (max-width: 980px) {
+  .metrics-grid,
+  .content-grid,
+  .bottom-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .topbar {
+    flex-wrap: wrap;
+    padding: 12px;
+  }
+
+  .brand {
+    min-width: auto;
+  }
+
+  .nav-links {
+    order: 3;
+    flex-basis: 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+  }
+
+  .page-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 560px) {
+  body {
+    padding: 12px;
+  }
+
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bar-chart {
+    gap: 10px;
+  }
+
+  .donut-wrap {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  th, td {
+    padding: 10px 8px;
+    font-size: 11px;
+  }
+}
+
+.nav-pill {
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.evaluation-filters {
+  display: flex;
+  gap: 10px;
+  margin: 0 0 12px;
+}
+
+.evaluation-filters input,
+.evaluation-filters select {
+  min-width: 0;
+  border: 1px solid #292532;
+  border-radius: 12px;
+  background: #0c0c11;
+  color: var(--ink);
+  font: inherit;
+  font-size: 11px;
+  padding: 9px 11px;
+}
+
+.evaluation-filters input {
+  flex: 1;
+}
+
+.evaluation-filters select {
+  min-width: 145px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.table-action {
+  border: 1px solid #3b2b50;
+  border-radius: 16px;
+  background: #111116;
+  color: #a855f7;
+  font: inherit;
+  font-size: 10px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.table-action:hover,
+.ghost-btn:hover,
+.primary-btn:hover {
+  filter: brightness(0.96);
+}
+
+.app-dialog {
+  width: min(440px, calc(100% - 32px));
+  border: 1px solid #3b2b50;
+  border-radius: 20px;
+  padding: 22px;
+  color: var(--ink);
+  background: #111116;
+  box-shadow: 0 18px 60px rgba(109, 40, 217, 0.3);
+}
+
+.app-dialog::backdrop {
+  background: rgba(5, 2, 12, 0.7);
+}
+
+.dialog-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.dialog-heading h2 {
+  font: 700 20px 'Manrope', sans-serif;
+  margin: 0 0 5px;
+}
+
+.dialog-heading p {
+  color: var(--muted);
+  font-size: 12px;
+  margin: 0;
+}
+
+.dialog-close {
+  border: 0;
+  background: transparent;
+  color: #69706b;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.app-dialog label {
+  display: block;
+  margin: 12px 0 6px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.app-dialog input {
+  width: 100%;
+  border: 1px solid #3b2b50;
+  border-radius: 10px;
+  background: #0c0c11;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  padding: 10px 11px;
+}
+
+.app-dialog input:focus,
+.evaluation-filters input:focus,
+.evaluation-filters select:focus {
+  outline: 2px solid #7c3aed;
+  outline-offset: 1px;
+}
+
+.app-dialog .primary-btn {
+  margin-top: 12px;
+}
+
+.dialog-error {
+  color: #f87171;
+  font-size: 12px;
+  margin: 8px 0 0;
+}
+
+.app-feedback {
+  position: fixed;
+  z-index: 5;
+  left: 50%;
+  bottom: 20px;
+  transform: translate(-50%, 12px);
+  opacity: 0;
+  pointer-events: none;
+  max-width: calc(100% - 32px);
+  border-radius: 12px;
+  background: #3b0764;
+  color: #f5f3ff;
+  padding: 11px 16px;
+  font-size: 12px;
+  box-shadow: 0 8px 24px rgba(109, 40, 217, 0.4);
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.app-feedback.visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.app-feedback.error {
+  background: #7f1d1d;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+    </style>
+  </head>
+  <body data-role="student">
+    <div class="page-shell">
+      <header class="topbar" id="dashboard">
+        <div class="brand">
+          <div class="brand-mark">✦</div>
+          <div class="brand-name">GradeWise<span> - AI</span></div>
+        </div>
+
+        <nav class="nav-links" aria-label="Main navigation">
+          <a class="nav-pill active" href="#dashboard">Dashboard</a>
+          <a class="nav-pill" href="#assignments">Assignments</a>
+          <a class="nav-pill" href="#evaluations">AI Evaluation</a>
+          <a class="nav-pill" href="#students">Students</a>
+          <a class="nav-pill" href="#reports">Reports &amp; Progress</a>
+        </nav>
+
+        <div class="nav-right">
+          <span class="nav-icon">⚙</span>
+          <span class="nav-icon">♧</span>
+          <button class="nav-icon" id="logout-button" type="button" aria-label="Log out" title="Log out">↪</button>
+          <span class="avatar">S</span>
+        </div>
+      </header>
+
+      <section class="page-head">
+        <div>
+          <div class="eyebrow">Workspace / Overview</div>
+          <h1>Dashboard Overview</h1>
+          <p class="page-sub">A clear view of your evaluations, assignments and learning progress.</p>
+        </div>
+
+        <div class="view-select" aria-label="View selector">
+          <label for="view">View</label>
+          <select id="view">
+            <option value="index.html">Main</option>
+            <option value="teacher.html">Teacher</option>
+            <option value="student.html" selected>Student</option>
+          </select>
+        </div>
+      </section>
+
+      <section class="metrics-grid">
+        <article class="hero-card card tall">
+          <div class="hero-kicker">Your evaluation workspace</div>
+          <h2>Hello, Student</h2>
+          <p>Turn written answers into meaningful feedback.</p>
+          <div class="hero-bottom">
+            <div class="hero-stat">
+              <strong id="class-average">0%</strong>
+              <span>Your average</span>
+            </div>
+            <div class="hero-stat">
+              <strong id="assignment-count">0</strong>
+              <span>Assignments</span>
+            </div>
+            <div class="hero-stat">
+              <strong>4.8</strong>
+              <span>Sample AI review score</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="card metric-card soft-blue">
+          <div class="metric-dot">▦</div>
+          <div class="metric-label">Submissions received</div>
+          <div class="metric-value" id="submission-count">0</div>
+          <div class="metric-foot">Across all active assignments</div>
+        </article>
+
+        <article class="card metric-card soft-green">
+          <div class="metric-dot">✓</div>
+          <div class="metric-label">Evaluated</div>
+          <div class="metric-value" id="evaluated-count">0</div>
+          <div class="metric-foot" id="evaluated-foot">0% of total submissions</div>
+        </article>
+
+        <article class="card metric-card soft-peach">
+          <div class="metric-dot">◷</div>
+          <div class="metric-label">Pending review</div>
+          <div class="metric-value" id="pending-count">0</div>
+          <div class="metric-foot">Waiting for teacher approval</div>
+        </article>
+      </section>
+
+      <section class="content-grid" id="reports">
+        <article class="card chart-panel">
+          <div class="panel-header" style="display:flex; justify-content:space-between; align-items:flex-end; gap:16px;">
+            <div>
+              <div class="card-title">Class performance overview</div>
+              <div class="card-sub">Average marks by subject across recent assessments</div>
+            </div>
+            <div class="mini-dropdown">
+              <span>Period</span>
+              <select id="performance-period" aria-label="Performance reporting period">
+                <option value="month">This month</option>
+                <option value="3months">Last 3 months</option>
+                <option value="semester">This semester</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="chart-wrap" aria-label="Performance bar chart">
+            <div class="chart-legend">
+              <span><i class="legend-swatch prev"></i> Previous</span>
+              <span><i class="legend-swatch current"></i> Current</span>
+            </div>
+
+            <div class="bar-chart">
+              <div class="bar-group" data-subject="DBMS">
+                <div class="bars">
+                  <span class="bar prev" data-series="previous" style="height:61%"> </span>
+                  <span class="bar current" data-series="current" style="height:72%"> </span>
+                </div>
+                <label>DBMS</label>
+              </div>
+              <div class="bar-group" data-subject="OS">
+                <div class="bars">
+                  <span class="bar prev" data-series="previous" style="height:65%"> </span>
+                  <span class="bar current" data-series="current" style="height:78%"> </span>
+                </div>
+                <label>OS</label>
+              </div>
+              <div class="bar-group" data-subject="Maths">
+                <div class="bars">
+                  <span class="bar prev" data-series="previous" style="height:59%"> </span>
+                  <span class="bar current" data-series="current" style="height:68%"> </span>
+                </div>
+                <label>Maths</label>
+              </div>
+              <div class="bar-group" data-subject="Python">
+                <div class="bars">
+                  <span class="bar prev" data-series="previous" style="height:73%"> </span>
+                  <span class="bar current" data-series="current" style="height:88%"> </span>
+                </div>
+                <label>Python</label>
+              </div>
+              <div class="bar-group" data-subject="AI/ML">
+                <div class="bars">
+                  <span class="bar prev" data-series="previous" style="height:70%"> </span>
+                  <span class="bar current" data-series="current" style="height:84%"> </span>
+                </div>
+                <label>AI/ML</label>
+              </div>
+              <div class="bar-group" data-subject="Java">
+                <div class="bars">
+                  <span class="bar prev" data-series="previous" style="height:64%"> </span>
+                  <span class="bar current" data-series="current" style="height:76%"> </span>
+                </div>
+                <label>Java</label>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="card donut-panel">
+          <div class="card-title">Evaluation summary</div>
+          <div class="card-sub">Submission status at a glance</div>
+
+          <div class="donut-wrap">
+            <div class="donut-chart">
+              <div class="donut-center">
+                <strong id="donut-total">0</strong>
+                <span>Total</span>
+              </div>
+            </div>
+            <div class="donut-legend">
+              <div><span class="dot green"></span> Approved <b id="approved-count">0</b></div>
+              <div><span class="dot orange"></span> AI evaluated <b id="ai-evaluated-count">0</b></div>
+              <div><span class="dot gray"></span> Pending <b id="donut-pending-count">0</b></div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="bottom-grid">
+        <article class="card list-panel" id="evaluations">
+          <div class="panel-header">
+            <div>
+              <div class="card-title">Recent evaluations</div>
+              <div class="card-sub">Latest student submissions and grading status</div>
+            </div>
+            <button class="ghost-btn" id="toggle-all-evaluations" type="button">View all</button>
+          </div>
+
+          <div class="evaluation-filters">
+            <label class="sr-only" for="evaluation-search">Search evaluations</label>
+            <input id="evaluation-search" type="search" placeholder="Search students or assignments" />
+            <label class="sr-only" for="evaluation-status">Filter by status</label>
+            <select id="evaluation-status">
+              <option value="">All statuses</option>
+              <option value="pending">Pending review</option>
+              <option value="ai_evaluated">AI evaluated</option>
+              <option value="approved">Approved</option>
+            </select>
+          </div>
+
+          <table id="evaluations-table">
+            <thead>
+              <tr>
+                <th>Assignment</th>
+                <th id="students">Student</th>
+                <th>Score</th>
+                <th>Status</th>
+                <th>Submitted</th>
+                <th id="evaluation-action-heading">Action</th>
+              </tr>
+            </thead>
+            <tbody id="evaluations-body"></tbody>
+          </table>
+        </article>
+
+        <aside class="right-stack">
+          <div class="card insight-card">
+            <div class="insight-top">
+              <span class="insight-title">✧ &nbsp; AI insights</span>
+              <span class="tag">SAMPLE INSIGHT</span>
+            </div>
+            <h3>Your class is improving.</h3>
+            <p>
+              Average scores in AI/ML and Python have increased over the last three assessments.
+              Process scheduling is the most common area where students need support.
+            </p>
+            <div class="progress-track">
+              <div class="progress-fill" style="width: 78%"></div>
+            </div>
+            <div class="small-row">
+              <span>Overall progress</span>
+              <b>78%</b>
+            </div>
+          </div>
+
+          <div class="card quick-action" id="assignments">
+            <div class="card-title">Quick action</div>
+            <div class="card-sub">Start your next evaluation workflow</div>
+            <button class="primary-btn" id="create-assignment-button" type="button">＋ Create assignment</button>
+            <ul class="assignment-list" id="assignment-list" aria-label="Assignments"></ul>
+          </div>
+        </aside>
+      </section>
+
+      <footer class="footer-note">
+        GradeWise - AI &nbsp;·&nbsp; Intelligent assessment workspace &nbsp;·&nbsp; AI suggestions require teacher review
+      </footer>
+    </div>
+    <div class="app-feedback" id="app-feedback" role="status" aria-live="polite"></div>
+    <dialog class="app-dialog" id="submit-dialog" style="width:min(520px,calc(100% - 32px));">
+      <form id="submit-form">
+        <div class="dialog-heading">
+          <div>
+            <h2>Submit Answer</h2>
+            <p id="submit-assignment-title"></p>
+          </div>
+          <button class="dialog-close" type="button" data-close-dialog aria-label="Close">×</button>
+        </div>
+        <label for="answer-pdf">Answer PDF</label>
+        <input id="answer-pdf" name="answer_pdf" type="file" accept="application/pdf,.pdf" required />
+        <small style="color:#a59bb5;font-size:11px;">Your PDF will be scanned with OCR and evaluated by AI. Score is shown instantly.</small>
+        <p class="dialog-error" id="submit-error" role="alert"></p>
+        <div id="submit-result" hidden></div>
+        <button class="primary-btn" type="submit">Submit</button>
+      </form>
+    </dialog>
+    <dialog class="app-dialog" id="assignment-dialog">
+      <form id="assignment-form" enctype="multipart/form-data">
+        <div class="dialog-heading">
+          <div>
+            <h2>Create assignment</h2>
+            <p>Set up an assignment for your class.</p>
+          </div>
+          <button class="dialog-close" type="button" data-close-dialog aria-label="Close">×</button>
+        </div>
+        <label for="assignment-title">Assignment title</label>
+        <input id="assignment-title" name="title" maxlength="160" required />
+        <label for="assignment-subject">Subject</label>
+        <input id="assignment-subject" name="subject" maxlength="80" required />
+        <label for="assignment-due-date">Due date</label>
+        <input id="assignment-due-date" name="due_date" type="date" />
+        <label for="assignment-total-marks">Total marks</label>
+        <input id="assignment-total-marks" name="total_marks" type="number" min="1" max="1000" step="1" value="20" required />
+        <label for="assignment-file">Assignment PDF</label>
+        <input id="assignment-file" name="assignment_file" type="file" accept="application/pdf,.pdf" required />
+        <small>Students will see the PDF after it is uploaded. Scanned pages are processed with Google Vision OCR.</small>
+        <p class="dialog-error" id="assignment-error" role="alert"></p>
+        <button class="primary-btn" type="submit">Save assignment</button>
+      </form>
+    </dialog>
+    <dialog class="app-dialog" id="review-dialog">
+      <form id="review-form">
+        <div class="dialog-heading">
+          <div>
+            <h2>Review evaluation</h2>
+            <p id="review-description"></p>
+          </div>
+          <button class="dialog-close" type="button" data-close-dialog aria-label="Close">×</button>
+        </div>
+        <label for="review-score">Approved score</label>
+        <input id="review-score" name="score" type="number" min="0" step="0.5" required />
+        <p class="dialog-error" id="review-error" role="alert"></p>
+        <button class="primary-btn" type="submit">Approve grade</button>
+      </form>
+    </dialog>
+    <script>
+      (() => {
+        const feedback = document.getElementById("app-feedback");
+        const evaluationBody = document.getElementById("evaluations-body");
+        const searchInput = document.getElementById("evaluation-search");
+        const statusFilter = document.getElementById("evaluation-status");
+        const toggleAllButton = document.getElementById("toggle-all-evaluations");
+        const assignmentDialog = document.getElementById("assignment-dialog");
+        const assignmentForm = document.getElementById("assignment-form");
+        const reviewDialog = document.getElementById("review-dialog");
+        const reviewForm = document.getElementById("review-form");
+        const studentView = document.body.dataset.role === "student";
+        let showAllEvaluations = false;
+        let selectedEvaluation = null;
+        let feedbackTimer;
+        let refreshPromise = null;
+
+        function refreshSession() {
+          if (!refreshPromise) {
+            refreshPromise = fetch("/api/auth/refresh", {
+              method: "POST",
+              credentials: "same-origin",
+            }).finally(() => {
+              refreshPromise = null;
+            });
+          }
+          return refreshPromise;
+        }
+
+        async function api(url, options = {}, retry = true) {
+          const response = await fetch(url, {
+            credentials: "same-origin",
+            ...options,
+            headers: {
+              ...(options.body && !(options.body instanceof FormData)
+                ? { "Content-Type": "application/json" }
+                : {}),
+              ...options.headers,
+            },
+          });
+          const publicAuthPaths = [
+            "/api/auth/login",
+            "/api/auth/signup",
+            "/api/auth/refresh",
+            "/api/auth/logout",
+          ];
+          if (
+            response.status === 401 &&
+            retry &&
+            !publicAuthPaths.includes(url.split("?")[0])
+          ) {
+            const refreshed = await refreshSession();
+            if (refreshed.ok) return api(url, options, false);
+            window.location.replace("/");
+            throw new Error("Please log in again.");
+          }
+          const result = await response.json().catch(() => ({}));
+          if (!response.ok) {
+            const error = new Error(result.error || `Request failed (${response.status}).`);
+            error.status = response.status;
+            throw error;
+          }
+          return result;
+        }
+
+        function showFeedback(message, isError = false) {
+          window.clearTimeout(feedbackTimer);
+          feedback.textContent = message;
+          feedback.classList.toggle("error", isError);
+          feedback.classList.add("visible");
+          feedbackTimer = window.setTimeout(() => feedback.classList.remove("visible"), 4500);
+        }
+
+        function setText(id, value) {
+          document.getElementById(id).textContent = value;
+        }
+
+        async function loadDashboard() {
+          const dashboard = await api("/api/dashboard");
+          setText("class-average", `${dashboard.class_average}%`);
+          setText("assignment-count", dashboard.assignment_count);
+          setText("submission-count", dashboard.submissions);
+          setText("evaluated-count", dashboard.evaluated);
+          setText("pending-count", dashboard.pending);
+          setText("evaluated-foot", `${dashboard.evaluated_percent}% of total submissions`);
+          setText("donut-total", dashboard.submissions);
+          setText("approved-count", dashboard.approved);
+          setText("ai-evaluated-count", dashboard.ai_evaluated);
+          setText("donut-pending-count", dashboard.pending);
+          const approvedPercent = dashboard.submissions
+            ? dashboard.approved * 100 / dashboard.submissions
+            : 0;
+          const aiPercent = dashboard.submissions
+            ? dashboard.ai_evaluated * 100 / dashboard.submissions
+            : 0;
+          document.querySelector(".donut-chart").style.background =
+            `conic-gradient(#a9d78d 0 ${approvedPercent}%, #f0c58f ${approvedPercent}% ${approvedPercent + aiPercent}%, #e9e9e5 ${approvedPercent + aiPercent}% 100%)`;
+        }
+
+        async function loadAssignments() {
+          const assignments = await api("/api/assignments");
+          const list = document.getElementById("assignment-list");
+          list.replaceChildren();
+          for (const assignment of assignments) {
+            const item = document.createElement("li");
+            const title = document.createElement("strong");
+            title.textContent = assignment.title;
+            const details = document.createElement("span");
+            const dueDate = assignment.due_date
+              ? ` · Due ${new Date(`${assignment.due_date}T00:00:00`).toLocaleDateString()}`
+              : "";
+            details.textContent = `${assignment.subject} · ${assignment.total_marks} marks${dueDate}`;
+            item.append(title, details);
+            if (assignment.has_file && assignment.file_url) {
+              const fileLink = document.createElement("a");
+              fileLink.href = assignment.file_url;
+              fileLink.target = "_blank";
+              fileLink.rel = "noopener noreferrer";
+              fileLink.textContent = `Open ${assignment.original_filename || "assignment PDF"}`;
+              item.append(fileLink);
+            }
+            if (assignment.ocr_excerpt) {
+              const excerpt = document.createElement("small");
+              excerpt.textContent = `Extracted text: ${assignment.ocr_excerpt}`;
+              item.append(excerpt);
+            }
+            const submitBtn = document.createElement("button");
+            submitBtn.type = "button";
+            submitBtn.className = "table-action";
+            submitBtn.textContent = "Submit Answer";
+            submitBtn.addEventListener("click", () => openSubmitDialog(assignment));
+            item.append(submitBtn);
+            list.append(item);
+          }
+        }
+
+        function formatSubmitted(value) {
+          const submittedAt = new Date(value);
+          const today = new Date();
+          const yesterday = new Date();
+          yesterday.setDate(today.getDate() - 1);
+          const time = submittedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+          if (submittedAt.toDateString() === today.toDateString()) return `Today, ${time}`;
+          if (submittedAt.toDateString() === yesterday.toDateString()) return `Yesterday, ${time}`;
+          return submittedAt.toLocaleDateString();
+        }
+
+        function makeCell(text) {
+          const cell = document.createElement("td");
+          cell.textContent = text;
+          return cell;
+        }
+
+        function renderEvaluations(items, total) {
+          evaluationBody.replaceChildren();
+          if (!items.length) {
+            const row = document.createElement("tr");
+            const cell = makeCell("No evaluations match these filters.");
+            cell.colSpan = studentView ? 5 : 6;
+            row.append(cell);
+            evaluationBody.append(row);
+          }
+
+          for (const item of items) {
+            const row = document.createElement("tr");
+            row.append(makeCell(item.assignment_title));
+            const studentCell = makeCell(item.student);
+            studentCell.id = `student-${item.id}`;
+            row.append(studentCell);
+            row.append(makeCell(item.score === null ? "—" : `${item.score} / ${item.total_marks}`));
+
+            const statusCell = document.createElement("td");
+            const statusBadge = document.createElement("span");
+            statusBadge.className = `status ${item.status === "ai_evaluated" ? "ai" : item.status}`;
+            statusBadge.textContent = {
+              approved: "Approved",
+              ai_evaluated: "AI evaluated",
+              pending: "Pending review",
+            }[item.status];
+            statusCell.append(statusBadge);
+            row.append(statusCell);
+            row.append(makeCell(formatSubmitted(item.submitted_at)));
+
+            if (!studentView) {
+              const actionCell = document.createElement("td");
+              if (item.status !== "approved") {
+                const actionButton = document.createElement("button");
+                actionButton.type = "button";
+                actionButton.className = "table-action";
+                actionButton.textContent = item.status === "pending" ? "Review" : "Approve";
+                actionButton.addEventListener("click", () => openReview(item));
+                actionCell.append(actionButton);
+              } else {
+                actionCell.textContent = "—";
+              }
+              row.append(actionCell);
+            }
+            evaluationBody.append(row);
+          }
+
+          toggleAllButton.hidden = total <= 5 && !showAllEvaluations;
+          toggleAllButton.textContent = showAllEvaluations ? "Show recent" : `View all (${total})`;
+        }
+
+        async function loadEvaluations() {
+          const params = new URLSearchParams();
+          params.set("limit", showAllEvaluations ? "200" : "5");
+          if (searchInput.value.trim()) params.set("q", searchInput.value.trim());
+          if (statusFilter.value) params.set("status", statusFilter.value);
+          const result = await api(`/api/evaluations?${params}`);
+          renderEvaluations(result.items, result.total);
+        }
+
+        async function loadPerformance() {
+          const result = await api(`/api/performance?period=${encodeURIComponent(document.getElementById("performance-period").value)}`);
+          const subjects = new Map(result.subjects.map((item) => [item.subject, item]));
+          document.querySelectorAll(".bar-group[data-subject]").forEach((group) => {
+            const values = subjects.get(group.dataset.subject) || { previous: 0, current: 0 };
+            group.querySelectorAll("[data-series]").forEach((bar) => {
+              bar.style.height = `${values[bar.dataset.series]}%`;
+              bar.setAttribute("aria-label", `${values[bar.dataset.series]}%`);
+            });
+          });
+        }
+
+        async function refreshDashboard() {
+          await Promise.all([loadDashboard(), loadAssignments(), loadEvaluations(), loadPerformance()]);
+        }
+
+        function openReview(item) {
+          selectedEvaluation = item;
+          document.getElementById("review-description").textContent =
+            `${item.student} · ${item.assignment_title}`;
+          const scoreInput = document.getElementById("review-score");
+          scoreInput.max = item.total_marks;
+          scoreInput.value = item.score ?? "";
+          document.getElementById("review-error").textContent = "";
+          reviewDialog.showModal();
+        }
+
+        const submitDialog = document.getElementById("submit-dialog");
+        const submitForm = document.getElementById("submit-form");
+        let selectedAssignment = null;
+
+        function openSubmitDialog(assignment) {
+          selectedAssignment = assignment;
+          document.getElementById("submit-assignment-title").textContent = assignment.title;
+          document.getElementById("submit-error").textContent = "";
+          document.getElementById("submit-result").hidden = true;
+          document.getElementById("submit-result").innerHTML = "";
+          submitForm.reset();
+          submitDialog.showModal();
+        }
+
+        submitForm.addEventListener("submit", async (event) => {
+          event.preventDefault();
+          if (!selectedAssignment) return;
+          const fileInput = document.getElementById("answer-pdf");
+          if (!fileInput.files[0]) { document.getElementById("submit-error").textContent = "Please select a PDF file."; return; }
+          const form = new FormData();
+          form.append("assignment_id", selectedAssignment.id);
+          form.append("answer_pdf", fileInput.files[0]);
+          const submitBtn = submitForm.querySelector("button[type=submit]");
+          submitBtn.textContent = "Evaluating...";
+          submitBtn.disabled = true;
+          document.getElementById("submit-error").textContent = "";
+          try {
+            const result = await api("/api/submissions", { method: "POST", body: form });
+            submitBtn.textContent = "Submit";
+            submitBtn.disabled = false;
+            const resultEl = document.getElementById("submit-result");
+            resultEl.hidden = false;
+            resultEl.innerHTML = `
+              <div style="background:#171124;border:1px solid #3b2b50;border-radius:12px;padding:14px;margin-top:12px;">
+                <div style="font:700 18px 'Manrope',sans-serif;color:#c4a5ff;">Score: ${result.score} / ${result.total_marks}</div>
+                <div style="font-size:11px;color:#bcb4c9;margin:4px 0 8px;">Status: ${result.status} &nbsp;·&nbsp; Confidence: ${Math.round(result.confidence * 100)}%</div>
+                <div style="font-size:12px;color:#e2dced;margin-bottom:8px;">${result.summary}</div>
+                ${result.criterion_scores.map(c => `
+                  <div style="border-top:1px solid #3b2b50;padding-top:6px;margin-top:6px;font-size:11px;">
+                    <b>${c.criterion}</b>: ${c.score}/${c.points} &nbsp;
+                    <span style="color:#a59bb5;">${c.feedback}</span>
+                  </div>`).join("")}
+              </div>`;
+            await refreshDashboard();
+          } catch (error) {
+            submitBtn.textContent = "Submit";
+            submitBtn.disabled = false;
+            document.getElementById("submit-error").textContent = error.message;
+          }
+        });
+
+        document.getElementById("create-assignment-button").addEventListener("click", () => {
+          document.getElementById("assignment-error").textContent = "";
+          assignmentForm.reset();
+          assignmentDialog.showModal();
+        });
+
+        assignmentForm.addEventListener("submit", async (event) => {
+          event.preventDefault();
+          const form = new FormData(assignmentForm);
+          try {
+            const created = await api("/api/assignments", { method: "POST", body: form });
+            assignmentDialog.close();
+            await refreshDashboard();
+            showFeedback(
+              ["google_vision", "embedded_text_and_google_vision"].includes(created.ocr_method)
+                ? "Assignment uploaded, OCR completed, and shared with students."
+                : "Assignment uploaded and shared with students."
+            );
+          } catch (error) {
+            document.getElementById("assignment-error").textContent = error.message;
+          }
+        });
+
+        reviewForm.addEventListener("submit", async (event) => {
+          event.preventDefault();
+          if (!selectedEvaluation) return;
+          const score = Number(new FormData(reviewForm).get("score"));
+          try {
+            await api(`/api/evaluations/${selectedEvaluation.id}`, {
+              method: "PATCH",
+              body: JSON.stringify({ status: "approved", score }),
+            });
+            reviewDialog.close();
+            selectedEvaluation = null;
+            await refreshDashboard();
+            showFeedback("Grade approved and saved.");
+          } catch (error) {
+            document.getElementById("review-error").textContent = error.message;
+          }
+        });
+
+        document.querySelectorAll("[data-close-dialog]").forEach((button) => {
+          button.addEventListener("click", () => button.closest("dialog").close());
+        });
+
+        toggleAllButton.addEventListener("click", async () => {
+          showAllEvaluations = !showAllEvaluations;
+          try {
+            await loadEvaluations();
+          } catch (error) {
+            showFeedback(error.message, true);
+          }
+        });
+
+        let searchTimer;
+        searchInput.addEventListener("input", () => {
+          window.clearTimeout(searchTimer);
+          searchTimer = window.setTimeout(() => {
+            loadEvaluations().catch((error) => showFeedback(error.message, true));
+          }, 200);
+        });
+        statusFilter.addEventListener("change", () => {
+          loadEvaluations().catch((error) => showFeedback(error.message, true));
+        });
+        document.getElementById("performance-period").addEventListener("change", () => {
+          loadPerformance().catch((error) => showFeedback(error.message, true));
+        });
+
+        document.querySelectorAll(".nav-pill").forEach((link) => {
+          link.addEventListener("click", () => {
+            document.querySelectorAll(".nav-pill").forEach((item) => item.classList.remove("active"));
+            link.classList.add("active");
+          });
+        });
+
+        document.getElementById("view").addEventListener("change", (event) => {
+          window.location.href = event.currentTarget.value;
+        });
+
+        document.getElementById("logout-button").addEventListener("click", async () => {
+          try {
+            await api("/api/auth/logout", { method: "POST" });
+            window.location.assign("/");
+          } catch (error) {
+            showFeedback(error.message, true);
+          }
+        });
+
+        async function initializeDashboard() {
+          const account = await api("/api/auth/me");
+          if (account.auth_enabled && account.role !== document.body.dataset.role) {
+            window.location.replace(account.redirect_url || "/");
+            return;
+          }
+          if (account.full_name) {
+            document.querySelector(".hero-card h2").textContent = `Hello, ${account.full_name}`;
+          }
+          if (studentView) {
+            document.getElementById("create-assignment-button").hidden = true;
+            document.getElementById("evaluation-action-heading").hidden = true;
+            document.querySelector(".quick-action .card-title").textContent = "My assignments";
+            document.querySelector(".quick-action .card-sub").textContent =
+              "Assignments shared by your teacher";
+          }
+          await refreshDashboard();
+        }
+
+        initializeDashboard().catch((error) => {
+          showFeedback(
+            `Could not load dashboard data (${error.message}). Run .venv\\Scripts\\python.exe app.py from the project folder, then open http://127.0.0.1:5000/student.html. Do not open student.html directly or with Live Server.`,
+            true
+          );
+        });
+      })();
+    </script>
+  </body>
+</html>
