@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gradewise — Instructor dashboard</title>
+  <link rel="stylesheet" href="grading-dashboard.css">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">✦</span> Gradewise</div>
+      <div class="workspace">Instructor workspace</div>
+      <nav class="nav">
+        <a class="active" href="#overview"><span class="ico">▦</span>Overview</a>
+        <a href="#submissions"><span class="ico">▤</span>Submissions</a>
+        <a href="#rubrics"><span class="ico">☷</span>Rubrics &amp; answer keys</a>
+        <a href="#analytics"><span class="ico">▥</span>Class analytics</a>
+        <div class="nav-label">Manage</div>
+        <a href="#review"><span class="ico">◉</span>Review queue <span class="nav-count">8</span></a>
+        <a href="#feedback"><span class="ico">▱</span>Feedback</a>
+        <a href="#audit"><span class="ico">◷</span>Audit log</a>
+      </nav>
+      <div class="side-bottom">
+        <div class="avatar">MC</div>
+        <div><strong>Dr. Maya Chen</strong><small>Faculty · Computer Science</small></div>
+        <span class="profile-chevron">⌄</span>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="crumb">
+          <button class="icon-btn mobile-menu" aria-label="Menu">☰</button>
+          Courses&nbsp; / &nbsp;<strong>CS 204 · Data Structures</strong>
+        </div>
+        <div class="top-actions">
+          <div class="role-switch" role="tablist" aria-label="Dashboard view">
+            <button class="active" type="button" data-role="teacher" role="tab" aria-selected="true">Teacher</button>
+            <button type="button" data-role="student" role="tab" aria-selected="false">Student</button>
+          </div>
+          <button class="icon-btn hide-mobile" aria-label="Help">?</button>
+          <button class="icon-btn" aria-label="Notifications">♧</button>
+          <div class="avatar top-avatar">MC</div>
+        </div>
+      </header>
+
+      <div class="content" id="overview">
+        <div class="teacher-view active" id="teacherView">
+          <section class="welcome">
+            <div>
+              <h1>Good morning, Maya <span>☀️</span></h1>
+              <p>Here’s what’s happening with your class today.</p>
+            </div>
+            <div class="actions">
+              <button class="btn" id="exportReport">↓ &nbsp;Export report</button>
+              <button class="btn primary" id="newAssessment">＋ &nbsp;New assessment</button>
+            </div>
+          </section>
+
+          <div class="filters">
+            <select class="select" aria-label="Course">
+              <option>CS 204 · Data Structures</option>
+              <option>CS 101 · Introduction to Programming</option>
+            </select>
+            <select class="select" aria-label="Term"><option>Fall 2026</option></select>
+            <input class="search" type="search" placeholder="⌕  Search students…">
+            <span class="filter-note">Last updated just now</span>
+          </div>
+
+          <section class="grid stats" aria-label="Class summary">
+            <article class="card stat">
+              <div class="stat-head">Enrolled students <span class="stat-icon">♙</span></div>
+              <div class="stat-value">128</div>
+              <div class="stat-foot"><span class="trend">↑ 4</span> from last term</div>
+            </article>
+            <article class="card stat">
+              <div class="stat-head">To be reviewed <span class="stat-icon amber">◷</span></div>
+              <div class="stat-value">8</div>
+              <div class="stat-foot"><span class="trend warn">Needs attention</span> · 3 flagged</div>
+            </article>
+            <article class="card stat">
+              <div class="stat-head">Average score <span class="stat-icon green">⌁</span></div>
+              <div class="stat-value">78.4<span class="denom"> / 100</span></div>
+              <div class="stat-foot"><span class="trend">↑ 3.2%</span> vs. previous assessment</div>
+            </article>
+            <article class="card stat">
+              <div class="stat-head">Grading completed <span class="stat-icon purple">✓</span></div>
+              <div class="stat-value">94<span class="denom">%</span></div>
+              <div class="stat-foot">120 of 128 submissions graded</div>
+            </article>
+          </section>
+
+          <section class="grid middle" id="analytics">
+            <article class="card panel">
+              <div class="panel-title">
+                <div><h2>Class performance</h2><div class="sub">Score trend across recent assessments</div></div>
+                <select class="select chart-select"><option>Last 6 assessments</option></select>
+              </div>
+              <div class="chart-wrap">
+                <svg class="chart" viewBox="0 0 600 190" preserveAspectRatio="none" role="img" aria-label="Class score trend chart">
+                  <defs>
+                    <linearGradient id="area" x1="0" x2="0" y1="0" y2="1">
+                      <stop offset="0" stop-color="#5477ed" stop-opacity=".2"/>
+                      <stop offset="1" stop-color="#5477ed" stop-opacity="0"/>
+                    </linearGradient>
+                  </defs>
+                  <line class="gridline" x1="0" y1="20" x2="600" y2="20"/>
+                  <line class="gridline" x1="0" y1="65" x2="600" y2="65"/>
+                  <line class="gridline" x1="0" y1="110" x2="600" y2="110"/>
+                  <line class="gridline" x1="0" y1="155" x2="600" y2="155"/>
+                  <text x="-31" y="23">100</text><text x="-24" y="68">75</text>
+                  <text x="-24" y="113">50</text><text x="-24" y="158">25</text>
+                  <path class="area" d="M0 111 L110 91 L220 101 L330 72 L440 82 L550 48 L550 170 L0 170Z"/>
+                  <path class="line" d="M0 111 L110 91 L220 101 L330 72 L440 82 L550 48"/>
+                  <path class="line2" d="M0 121 L110 114 L220 104 L330 96 L440 90 L550 85"/>
+                  <text x="-3" y="186">Quiz 1</text><text x="102" y="186">Lab 1</text>
+                  <text x="211" y="186">Quiz 2</text><text x="319" y="186">Lab 2</text>
+                  <text x="426" y="186">Midterm</text><text x="532" y="186">Project</text>
+                </svg>
+              </div>
+              <div class="legend"><span><i class="dot"></i>Class average</span><span><i class="dot green-dot"></i>Course target</span></div>
+            </article>
+
+            <article class="card panel" id="rubrics">
+              <div class="panel-title">
+                <div><h2>Rubric performance</h2><div class="sub">Midterm · average by criterion</div></div>
+                <a class="link" href="#rubrics">View rubric</a>
+              </div>
+              <div class="rubric-list">
+                <div class="rubric-row"><strong>Concept understanding</strong><span>82%</span><div class="bar"><i style="width:82%"></i></div></div>
+                <div class="rubric-row"><strong>Problem-solving approach</strong><span>74%</span><div class="bar"><i class="g" style="width:74%"></i></div></div>
+                <div class="rubric-row"><strong>Code correctness</strong><span>68%</span><div class="bar"><i class="y" style="width:68%"></i></div></div>
+                <div class="rubric-row"><strong>Explanation &amp; clarity</strong><span>79%</span><div class="bar"><i style="width:79%"></i></div></div>
+                <div class="rubric-note">Common gap: <strong>Edge-case handling</strong> · 31 students</div>
+              </div>
+            </article>
+          </section>
+
+          <section class="card table-panel" id="submissions">
+            <div class="panel-title">
+              <div><h2>Recent submissions</h2><div class="sub">Review AI-assisted grading, adjust scores, and release feedback.</div></div>
+              <div class="table-tools">
+                <input class="search" type="search" placeholder="⌕  Find student">
+                <select class="select status-filter" aria-label="Filter submissions">
+                  <option value="all">All statuses</option>
+                  <option value="Needs review">Needs review</option>
+                  <option value="Flagged">Flagged</option>
+                  <option value="Auto-graded">Auto-graded</option>
+                  <option value="Released">Released</option>
+                </select>
+                <a class="link" href="#submissions">All submissions →</a>
+              </div>
+            </div>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>Assessment</th>
+                    <th>Submitted</th>
+                    <th>AI score</th>
+                    <th>Confidence</th>
+                    <th>Status</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><div class="student"><span class="avatar">AR</span><div>Alex Rivera<small>CS204-018</small></div></div></td>
+                    <td>Midterm · Q4</td>
+                    <td>Today, 9:42 AM</td>
+                    <td class="score">18 / 20</td>
+                    <td><span class="badge ok">96% · High</span></td>
+                    <td><span class="badge review">Needs review</span></td>
+                    <td><button class="row-actions" aria-label="Review submission">···</button></td>
+                  </tr>
+                  <tr>
+                    <td><div class="student"><span class="avatar green-avatar">PS</span><div>Priya Sharma<small>CS204-023</small></div></div></td>
+                    <td>Midterm · Q4</td>
+                    <td>Today, 9:18 AM</td>
+                    <td class="score">16 / 20</td>
+                    <td><span class="badge review">78% · Medium</span></td>
+                    <td><span class="badge review">Needs review</span></td>
+                    <td><button class="row-actions" aria-label="Review submission">···</button></td>
+                  </tr>
+                  <tr>
+                    <td><div class="student"><span class="avatar orange-avatar">JM</span><div>Jordan Miller<small>CS204-031</small></div></div></td>
+                    <td>Midterm · Q3</td>
+                    <td>Today, 8:56 AM</td>
+                    <td class="score">12 / 15</td>
+                    <td><span class="badge ok">91% · High</span></td>
+                    <td><span class="badge ai">Auto-graded</span></td>
+                    <td><button class="row-actions" aria-label="Review submission">···</button></td>
+                  </tr>
+                  <tr>
+                    <td><div class="student"><span class="avatar purple-avatar">SK</span><div>Sam Kim<small>CS204-044</small></div></div></td>
+                    <td>Midterm · Q2</td>
+                    <td>Today, 8:31 AM</td>
+                    <td class="score">14 / 20</td>
+                    <td><span class="badge review">64% · Low</span></td>
+                    <td><span class="badge review">Flagged</span></td>
+                    <td><button class="row-actions" aria-label="Review submission">···</button></td>
+                  </tr>
+                  <tr>
+                    <td><div class="student"><span class="avatar gray-avatar">TW</span><div>Taylor Wong<small>CS204-051</small></div></div></td>
+                    <td>Midterm · Q4</td>
+                    <td>Yesterday, 4:12 PM</td>
+                    <td class="score">19 / 20</td>
+                    <td><span class="badge ok">98% · High</span></td>
+                    <td><span class="badge ai">Auto-graded</span></td>
+                    <td><button class="row-actions" aria-label="Review submission">···</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="grid bottom">
+            <article class="card panel" id="review">
+              <div class="panel-title"><div><h2>Review queue</h2><div class="sub">Items needing faculty attention</div></div><a class="link" href="#review">Open queue →</a></div>
+              <div class="feed">
+                <div class="feed-item"><div class="feed-icon">⚑</div><div><p><strong>3 low-confidence grades</strong> need a second look</p><small>Midterm · Q2 · Submitted within the last hour</small></div></div>
+                <div class="feed-item"><div class="feed-icon amber-icon">◉</div><div><p><strong>5 score overrides</strong> awaiting your approval</p><small>Lab 2 · Manual review requested by teaching assistant</small></div></div>
+                <div class="feed-item"><div class="feed-icon green-icon">✉</div><div><p><strong>Feedback ready to release</strong> for 24 students</p><small>Project checkpoint · Last updated 10:08 AM</small><br><button class="btn release-feedback">Release feedback</button></div></div>
+              </div>
+            </article>
+            <article class="card panel" id="audit">
+              <div class="panel-title"><div><h2>Recent faculty activity</h2><div class="sub">Score changes and moderation history</div></div><a class="link" href="#audit">Audit log →</a></div>
+              <div class="audit"><strong>Priya Sharma · Midterm Q4</strong><time>10:32 AM</time><span>Score changed 14 → 16 by Dr. Chen · Reason: alternate valid approach</span></div>
+              <div class="audit"><strong>Alex Rivera · Midterm Q1</strong><time>Yesterday</time><span>AI feedback edited by Dr. Chen · Comment added to criterion 2</span></div>
+              <div class="audit"><strong>Jordan Miller · Lab 2</strong><time>Nov 10</time><span>Grade confirmed by Dr. Chen · AI score retained</span></div>
+            </article>
+          </section>
+        </div>
+
+        <div class="student-view" id="studentView">
+          <section class="student-hero">
+            <div><h1>Welcome back, Alex 👋</h1><p>Here’s your learning progress in Data Structures.</p></div>
+            <div class="hero-pill">Fall 2026 · CS 204</div>
+          </section>
+          <section class="grid student-stats">
+            <article class="card stat">
+              <div class="stat-head">Current course grade <span class="stat-icon">▥</span></div>
+              <div class="grade-summary">
+                <div class="grade-ring"></div>
+                <div><strong class="grade-label">B · On track</strong><div class="stat-foot">Class average: 78.4%</div></div>
+              </div>
+            </article>
+            <article class="card stat"><div class="stat-head">Assessments completed <span class="stat-icon green">✓</span></div><div class="stat-value">8 <span class="denom">/ 10</span></div><div class="stat-foot">2 upcoming this term</div></article>
+            <article class="card stat"><div class="stat-head">Next due date <span class="stat-icon amber">◷</span></div><div class="stat-value due-date">Nov 18</div><div class="stat-foot">Project checkpoint · 6 days left</div></article>
+          </section>
+          <section class="grid middle">
+            <article class="card panel">
+              <div class="panel-title"><div><h2>Recent assessment results</h2><div class="sub">Your scores and instructor feedback</div></div><button class="btn" id="allResults">All results</button></div>
+              <div class="student-assessment"><div><strong>Midterm · Question 4</strong><small>Graded today · Reviewed by Dr. Chen</small></div><b>18 <span>/ 20</span></b></div>
+              <div class="student-assessment"><div><strong>Midterm · Question 3</strong><small>Graded today · Feedback available</small></div><b>12 <span>/ 15</span></b></div>
+              <div class="student-assessment"><div><strong>Lab 2 · Binary search trees</strong><small>Nov 8 · Feedback available</small></div><b>86 <span>/ 100</span></b></div>
+              <div class="student-assessment"><div><strong>Quiz 4 · Hash tables</strong><small>Nov 4 · Auto-graded</small></div><b>9 <span>/ 10</span></b></div>
+            </article>
+            <article class="card panel">
+              <div class="panel-title"><div><h2>Midterm · Q4 breakdown</h2><div class="sub">Rubric scores · 18 of 20 points</div></div><span class="badge ok">Reviewed</span></div>
+              <div class="rubric-list">
+                <div class="rubric-row"><strong>Concept understanding</strong><span>5 / 5</span><div class="bar"><i class="g" style="width:100%"></i></div></div>
+                <div class="rubric-row"><strong>Problem-solving approach</strong><span>5 / 6</span><div class="bar"><i style="width:83%"></i></div></div>
+                <div class="rubric-row"><strong>Code correctness</strong><span>5 / 5</span><div class="bar"><i class="g" style="width:100%"></i></div></div>
+                <div class="rubric-row"><strong>Explanation &amp; clarity</strong><span>3 / 4</span><div class="bar"><i class="y" style="width:75%"></i></div></div>
+              </div>
+              <div class="feedback-box"><strong>Instructor feedback</strong><br>Your solution handles the main case correctly and your reasoning is clear. To earn the remaining points, mention how your approach behaves for an empty input and explain its time complexity.</div>
+            </article>
+          </section>
+          <section class="grid bottom">
+            <article class="card panel">
+              <div class="panel-title"><div><h2>What you’re doing well</h2><div class="sub">Based on your recent rubric results</div></div></div>
+              <div class="rubric-list">
+                <div class="rubric-row"><strong>Concept understanding</strong><span>Strong</span><div class="bar"><i class="g" style="width:86%"></i></div></div>
+                <div class="rubric-row"><strong>Code correctness</strong><span>Strong</span><div class="bar"><i class="g" style="width:81%"></i></div></div>
+                <div class="rubric-row"><strong>Edge-case handling</strong><span>Practice</span><div class="bar"><i class="y" style="width:62%"></i></div></div>
+              </div>
+            </article>
+            <article class="card panel">
+              <div class="panel-title"><div><h2>Suggested next steps</h2><div class="sub">Small steps to strengthen your understanding</div></div></div>
+              <div class="student-steps">
+                <div class="step"><span class="step-icon">1</span><p><strong>Review edge cases</strong><br><small>Try empty and single-item inputs in the practice set.</small></p></div>
+                <div class="step"><span class="step-icon">2</span><p><strong>Revisit time complexity</strong><br><small>See the short guide linked in Week 6 materials.</small></p></div>
+                <div class="step"><span class="step-icon">↗</span><p><strong>Open practice materials</strong><br><small>Optional exercises · about 15 minutes</small></p></div>
+              </div>
+            </article>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const $ = (s, r = document) => r.querySelector(s);
+    const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+    const tableBody = $('tbody');
+
+    function toast(message) {
+      const old = $('.toast');
+      if (old) old.remove();
+      const node = document.createElement('div');
+      node.className = 'toast';
+      node.textContent = message;
+      document.body.append(node);
+      setTimeout(() => node.remove(), 2800);
+    }
+
+    $$('[data-role]').forEach(button => {
+      button.addEventListener('click', () => {
+        const student = button.dataset.role === 'student';
+        $('#teacherView').classList.toggle('hidden', student);
+        $('#studentView').classList.toggle('active', student);
+        $('#teacherView').classList.toggle('active', !student);
+        $$('[data-role]').forEach(tab => {
+          const active = tab === button;
+          tab.classList.toggle('active', active);
+          tab.setAttribute('aria-selected', String(active));
+        });
+        $('.crumb strong').textContent = student ? 'CS 204 · Data Structures · Student view' : 'CS 204 · Data Structures';
+      });
+    });
+
+    function filterRows() {
+      const q = ($('.table-tools .search')?.value || $('.filters .search')?.value || '').toLowerCase().trim();
+      const status = $('.status-filter')?.value || 'all';
+      let shown = 0;
+      $$('tbody tr').forEach(row => {
+        const matchesText = row.textContent.toLowerCase().includes(q);
+        const matchesStatus = status === 'all' || row.cells[5].textContent.trim() === status;
+        row.hidden = !(matchesText && matchesStatus);
+        if (!row.hidden) shown++;
+      });
+
+      let empty = $('.empty-row');
+      if (!shown && !empty) {
+        empty = document.createElement('tr');
+        empty.className = 'empty-row';
+        empty.innerHTML = '<td colspan="7">No submissions match these filters.</td>';
+        tableBody.append(empty);
+      } else if (shown && empty) {
+        empty.remove();
+      }
+    }
+
+    $$('.search').forEach(input => {
+      input.addEventListener('input', () => {
+        const other = $$('.search').find(item => item !== input);
+        if (other) other.value = input.value;
+        filterRows();
+      });
+    });
+
+    $('.status-filter').addEventListener('change', filterRows);
+
+    $('#exportReport').addEventListener('click', () => {
+      const rows = [
+        ['Student', 'ID', 'Assessment', 'Submitted', 'Score', 'Confidence', 'Status'],
+        ...$$('tbody tr')
+          .filter(r => !r.hidden)
+          .map(r => [
+            r.cells[0].innerText.replace(/\n/g, ' '),
+            r.cells[0].innerText.split('\n').pop(),
+            r.cells[1].innerText,
+            r.cells[2].innerText,
+            r.cells[3].innerText,
+            r.cells[4].innerText,
+            r.cells[5].innerText,
+          ])
+      ];
+      const csv = rows.map(row => row.map(v => '"' + String(v).replaceAll('"', '""') + '"').join(',')).join('\r\n');
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+      a.download = 'grading-report.csv';
+      a.click();
+      URL.revokeObjectURL(a.href);
+      toast('Report exported as CSV');
+    });
+
+    function modal(title, subtitle, content, onSave, saveText = 'Save changes') {
+      const wrap = document.createElement('div');
+      wrap.className = 'modal-backdrop';
+      wrap.innerHTML = `<section class="modal" role="dialog" aria-modal="true">
+        <h2>${title}</h2>
+        <div class="sub">${subtitle}</div>
+        ${content}
+        <div class="modal-actions">
+          <button class="btn cancel">Cancel</button>
+          <button class="btn primary save">${saveText}</button>
+        </div>
+      </section>`;
+      document.body.append(wrap);
+      wrap.addEventListener('click', e => {
+        if (e.target === wrap || e.target.closest('.cancel')) wrap.remove();
+      });
+      $('.save', wrap).addEventListener('click', () => {
+        if (onSave(wrap) !== false) wrap.remove();
+      });
+      return wrap;
+    }
+
+    function openReview(row) {
+      const name = $('.student', row).innerText.split('\n')[0];
+      const scoreText = row.cells[3].textContent.trim();
+      const max = Number(scoreText.split('/')[1]);
+      const current = Number(scoreText.split('/')[0]);
+
+      const dlg = modal(
+        'Review submission',
+        name + ' · ' + row.cells[1].textContent.trim(),
+        `<label>Score (out of ${max})</label>
+        <input type="number" class="score-input" min="0" max="${max}" value="${current}">
+        <label>Feedback for student</label>
+        <textarea class="feedback-input" placeholder="Add a clear, constructive comment…">${row.dataset.feedback || 'Your approach is correct. Add a brief explanation of edge cases to strengthen your answer.'}</textarea>
+        <label class="release-label"><input type="checkbox" class="release-check"> Release this feedback to the student</label>`,
+        box => {
+          const input = $('.score-input', box);
+          const score = Number(input.value);
+          if (!Number.isFinite(score) || score < 0 || score > max) {
+            input.focus();
+            return false;
+          }
+          const previous = row.cells[3].textContent.trim();
+          row.cells[3].textContent = score + ' / ' + max;
+          row.dataset.feedback = $('.feedback-input', box).value;
+          const release = $('.release-check', box).checked;
+
+          row.cells[5].innerHTML = '<span class="badge ' + (release ? 'ai' : 'review') + '">' + (release ? 'Released' : 'Reviewed') + '</span>';
+
+          const audit = $('#audit');
+          const item = document.createElement('div');
+          item.className = 'audit';
+          item.innerHTML = '<strong></strong><time>Just now</time><span></span>';
+          item.querySelector('strong').textContent = name + ' · ' + row.cells[1].textContent.trim();
+          item.querySelector('span').textContent = 'Score changed ' + previous + ' → ' + score + ' by Dr. Chen · Feedback ' + (release ? 'released to student' : 'saved as draft');
+          audit.append(item);
+          toast(release ? 'Score saved and feedback released' : 'Score saved to review log');
+        }
+      );
+      dlg.querySelector('.score-input').focus();
+    }
+
+    $$('.row-actions').forEach(button => {
+      button.addEventListener('click', () => openReview(button.closest('tr')));
+    });
+
+    $$('.release-feedback').forEach(button => {
+      button.addEventListener('click', () => {
+        button.textContent = 'Feedback released';
+        button.disabled = true;
+        button.classList.remove('release-feedback');
+        toast('Feedback released to 24 students');
+      });
+    });
+
+    $('#newAssessment').addEventListener('click', () => {
+      const box = modal(
+        'Create assessment',
+        'Add an assessment to the submission list.',
+        '<label>Assessment name</label><input class="assessment-name" placeholder="e.g. Quiz 5 · Graphs" required><label>Maximum score</label><input class="assessment-max" type="number" min="1" value="20">',
+        dlg => {
+          const name = $('.assessment-name', dlg).value.trim();
+          const max = Number($('.assessment-max', dlg).value);
+          if (!name || max < 1) {
+            $('.assessment-name', dlg).focus();
+            return false;
+          }
+          const tr = document.createElement('tr');
+          tr.innerHTML = '<td><div class="student"><span class="avatar">MC</span><div>New submission<small>Pending</small></div></div></td><td></td><td>Not submitted</td><td class="score">— / ' + max + '</td><td><span class="badge ai">Pending</span></td><td><span class="badge review">Awaiting submissions</span></td><td>—</td>';
+          tr.cells[1].textContent = name;
+          tableBody.prepend(tr);
+          tr.dataset.feedback = '';
+          toast('Assessment added to the dashboard');
+        },
+        'Create assessment'
+      );
+      box.querySelector('.assessment-name').focus();
+    });
+
+    $('#allResults').addEventListener('click', () => toast('Showing all assessment results for this course'));
+  </script>
+</body>
+</html>
